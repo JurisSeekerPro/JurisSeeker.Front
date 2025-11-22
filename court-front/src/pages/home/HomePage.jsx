@@ -7,14 +7,51 @@ import Pagination from "../../components/Pagination";
 import SearchFilters from "../../components/filters/SearchFilters";
 import "../../styles/components.css";
 
-const GET_COURT_CASES = gql`
-  query GetCourtCases(
+// Запрос без фильтрации для начальной загрузки
+const GET_COURT_CASES_SIMPLE = gql`
+  query GetCourtCasesSimple(
     $first: Int
     $after: String
   ) {
     courtCases(
       first: $first
       after: $after
+    ) {
+      edges {
+        node {
+          id
+          title
+          caseNumber
+          courtType
+          plaintiff
+          defendant
+          region
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+      }
+    }
+  }
+`;
+
+// Запрос с фильтрацией
+const GET_COURT_CASES_WITH_FILTERS = gql`
+  query GetCourtCasesWithFilters(
+    $first: Int
+    $after: String
+    $region: String
+    $courtType: String
+    $caseNumber: String
+  ) {
+    courtCases(
+      first: $first
+      after: $after
+      where: {
+        ${"" /* Фильтры будут добавлены динамически */}
+      }
     ) {
       edges {
         node {
@@ -55,100 +92,120 @@ export default function HomePage() {
     legalNorms: ""
   });
 
+  const [activeFilters, setActiveFilters] = useState({});
   const [page, setPage] = useState(1);
   const [cursors, setCursors] = useState([]);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [searchPerformed, setSearchPerformed] = useState(false);
   const casesPerPage = 10;
 
-  const variables = useMemo(() => {
-    const where = {};
-    
-    // Текстовые фильтры с contains
-    if (filters.searchText?.trim()) {
-      where.or = [
-        { title: { contains: filters.searchText.trim() } },
-        { description: { contains: filters.searchText.trim() } }
-      ];
+  // Динамически формируем запрос в зависимости от наличия фильтров
+  const { query, variables } = useMemo(() => {
+    if (!searchPerformed) {
+      return { query: null, variables: null };
     }
-    
-    if (filters.caseNumber?.trim()) {
-      where.caseNumber = { contains: filters.caseNumber.trim() };
-    }
-    
-    if (filters.plaintiff?.trim()) {
-      where.plaintiff = { contains: filters.plaintiff.trim() };
-    }
-    
-    if (filters.defendant?.trim()) {
-      where.defendant = { contains: filters.defendant.trim() };
-    }
-    
-    // Фильтр по регионам
-    if (filters.regions?.length) {
-      where.region = { in: filters.regions };
-    }
-    
-    // Фильтр по типу суда
-    if (filters.courtTypes?.length) {
-      where.courtType = { in: filters.courtTypes };
-    }
-    
-    // Фильтр по наличию решения
-    if (filters.hasDecision === "yes") {
-      where.hasDecision = { eq: true };
-    } else if (filters.hasDecision === "no") {
-      where.hasDecision = { eq: false };
-    }
-    
-    // Фильтр по дате поступления
-    if (filters.startDate || filters.endDate) {
-      where.receivedDate = {};
-      if (filters.startDate) where.receivedDate.gte = filters.startDate;
-      if (filters.endDate) where.receivedDate.lte = filters.endDate;
-    }
-    
-    // Фильтр по дате решения
-    if (filters.decisionStartDate || filters.decisionEndDate) {
-      where.decisionDate = {};
-      if (filters.decisionStartDate) where.decisionDate.gte = filters.decisionStartDate;
-      if (filters.decisionEndDate) where.decisionDate.lte = filters.decisionEndDate;
-    }
-    
-    const vars = { 
+
+    const baseVars = { 
       first: casesPerPage, 
       after: page > 1 ? cursors[page - 2] : null 
     };
-    
-    // Добавляем where только если есть фильтры
-    if (Object.keys(where).length > 0) {
-      vars.where = where;
+
+    const filterConditions = [];
+    const filterVars = { ...baseVars };
+
+    // Добавляем фильтры только если они есть
+    if (activeFilters.regions?.length > 0) {
+      filterConditions.push(`region: { eq: $region }`);
+      filterVars.region = activeFilters.regions[0];
     }
     
-    console.log("GraphQL variables:", vars);
-    return vars;
-  }, [filters, page, cursors]);
+    if (activeFilters.courtTypes?.length > 0) {
+      filterConditions.push(`courtType: { eq: $courtType }`);
+      filterVars.courtType = activeFilters.courtTypes[0];
+    }
+    
+    if (activeFilters.caseNumber?.trim()) {
+      filterConditions.push(`caseNumber: { contains: $caseNumber }`);
+      filterVars.caseNumber = activeFilters.caseNumber.trim();
+    }
 
-  const { loading, error, data, refetch } = useQuery(GET_COURT_CASES, {
+    // Если есть фильтры - используем запрос с фильтрацией, иначе простой запрос
+    let dynamicQuery;
+    if (filterConditions.length > 0) {
+      const whereClause = filterConditions.join("\n        ");
+      dynamicQuery = gql`
+        query GetCourtCasesWithFilters(
+          $first: Int
+          $after: String
+          ${filterVars.region ? '$region: String' : ''}
+          ${filterVars.courtType ? '$courtType: String' : ''}
+          ${filterVars.caseNumber ? '$caseNumber: String' : ''}
+        ) {
+          courtCases(
+            first: $first
+            after: $after
+            where: {
+              ${whereClause}
+            }
+          ) {
+            edges {
+              node {
+                id
+                title
+                caseNumber
+                courtType
+                plaintiff
+                defendant
+                region
+              }
+            }
+            pageInfo {
+              hasNextPage
+              hasPreviousPage
+              endCursor
+            }
+          }
+        }
+      `;
+    } else {
+      dynamicQuery = GET_COURT_CASES_SIMPLE;
+    }
+
+    console.log("=== GRAPHQL ЗАПРОС ===");
+    console.log("Строка запроса:");
+    console.log(dynamicQuery.loc?.source.body);
+    console.log("Переменные:", JSON.stringify(filterVars, null, 2));
+    console.log("Активные фильтры:", activeFilters);
+    console.log("Используется запрос с фильтрами:", filterConditions.length > 0);
+    console.log("====================");
+
+    return { 
+      query: dynamicQuery, 
+      variables: filterVars 
+    };
+  }, [activeFilters, page, cursors, searchPerformed]);
+
+  const { loading, error, data, refetch } = useQuery(query || GET_COURT_CASES_SIMPLE, {
     variables,
+    skip: !searchPerformed || !query,
     fetchPolicy: "network-only",
     onCompleted: (res) => {
       console.log("GraphQL ответ:", res);
-      setInitialLoad(false);
     },
     onError: (err) => {
       console.error("GraphQL ошибка:", err);
-      setInitialLoad(false);
+      console.error("Детали ошибки:", err.message);
+      console.error("Сетевые детали:", err.networkError);
+      console.error("Граф ошибки:", err.graphQLErrors);
     },
   });
 
-  // Сброс пагинации при изменении фильтров
+  // Сброс пагинации при новом поиске
   useEffect(() => {
-    setPage(1);
-    setCursors([]);
-    if (!initialLoad) {
-      refetch(variables);
+    if (searchPerformed) {
+      setPage(1);
+      setCursors([]);
     }
-  }, [filters, refetch]);
+  }, [activeFilters]);
 
   const handlePageChange = (newPage) => {
     if (newPage > page && data?.courtCases?.pageInfo?.endCursor) {
@@ -166,7 +223,30 @@ export default function HomePage() {
 
   const handleSearch = (searchFilters) => {
     console.log("Search with filters:", searchFilters);
-    setFilters(searchFilters);
+    setActiveFilters(searchFilters);
+    setSearchPerformed(true);
+  };
+
+  const handleClearSearch = () => {
+    setActiveFilters({});
+    setSearchPerformed(false);
+    setFilters({
+      searchText: "",
+      caseNumber: "",
+      plaintiff: "",
+      defendant: "",
+      regions: [],
+      courtTypes: [],
+      articles: [],
+      startDate: "",
+      endDate: "",
+      decisionStartDate: "",
+      decisionEndDate: "",
+      hasDecision: "",
+      legalNorms: ""
+    });
+    setPage(1);
+    setCursors([]);
   };
 
   const currentCases = flattenEdges(data?.courtCases?.edges);
@@ -180,32 +260,98 @@ export default function HomePage() {
         filters={filters}
         onFiltersChange={handleFilterChange}
         onSearch={handleSearch}
+        onClear={handleClearSearch}
         compact={false}
       />
 
-      {!initialLoad && loading && <p className="text-body">Загрузка судебных дел...</p>}
-      {error && (
-        <p className="text-body text-error">Ошибка загрузки: {error.message}</p>
+      {/* Состояние до поиска */}
+      {!searchPerformed && (
+        <div className="search-prompt">
+          <div className="prompt-content">
+            <h3>Начните поиск судебных дел</h3>
+            <p>Заполните фильтры и нажмите кнопку "Найти дела" для отображения результатов</p>
+            <div className="prompt-features">
+              <div className="feature">
+                <span className="feature-icon">🗺️</span>
+                <span>Фильтрация по регионам России</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">⚖️</span>
+                <span>Выбор типа суда</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🔢</span>
+                <span>Поиск по номеру дела</span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {currentCases.length > 0 ? (
+      {/* Состояние после поиска */}
+      {searchPerformed && (
         <>
-          <div className="case-list mb-lg">
-            {currentCases.map((courtCase) => (
-              <CaseCard key={courtCase.id} courtCase={courtCase} />
-            ))}
-          </div>
-          <Pagination
-            currentPage={page}
-            hasNextPage={pageInfo?.hasNextPage}
-            hasPreviousPage={pageInfo?.hasPreviousPage}
-            onPageChange={handlePageChange}
-          />
+          {loading && <p className="text-body">Загрузка судебных дел...</p>}
+          {error && (
+            <div className="text-body text-error">
+              <p>Ошибка загрузки: {error.message}</p>
+              <div style={{ marginTop: '10px', padding: '10px', background: '#f8f9fa', borderRadius: '4px' }}>
+                <strong>Отладочная информация:</strong>
+                <div style={{ marginTop: '5px', fontSize: '0.9rem' }}>
+                  Проверьте консоль браузера для деталей запроса
+                </div>
+              </div>
+              <button 
+                className="button button-primary"
+                onClick={() => refetch()}
+                style={{marginTop: '10px'}}
+              >
+                Повторить запрос
+              </button>
+            </div>
+          )}
+
+          {currentCases && currentCases.length > 0 ? (
+            <>
+              <div className="search-results-header">
+                <h2>Результаты поиска</h2>
+                <p>Найдено дел: {currentCases.length}</p>
+                <button 
+                  className="button button-clear"
+                  onClick={handleClearSearch}
+                >
+                  Очистить результаты
+                </button>
+              </div>
+
+              <div className="case-list mb-lg">
+                {currentCases.map((courtCase) => (
+                  <CaseCard key={courtCase.id} courtCase={courtCase} />
+                ))}
+              </div>
+              
+              <Pagination
+                currentPage={page}
+                hasNextPage={pageInfo?.hasNextPage}
+                hasPreviousPage={pageInfo?.hasPreviousPage}
+                onPageChange={handlePageChange}
+              />
+            </>
+          ) : (
+            !loading && (
+              <div className="no-results">
+                <h3>Ничего не найдено</h3>
+                <p>Попробуйте изменить параметры поиска или очистить фильтры</p>
+                <button 
+                  className="button button-primary"
+                  onClick={handleClearSearch}
+                >
+                  Очистить поиск
+                </button>
+              </div>
+            )
+          )}
         </>
-      ) : (
-        !loading && !initialLoad && (
-          <p className="text-body">Нет судебных дел, соответствующих текущим фильтрам</p>
-        )
       )}
     </div>
   );

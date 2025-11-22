@@ -1,32 +1,82 @@
 // src/pages/CaseDetailPage.jsx
 import React from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { motion } from 'framer-motion';
-import '../styles/components.css';
+
+// GraphQL запрос для получения дела по CourtCaseId
+const GET_COURT_CASE_BY_COURT_CASE_ID = gql`
+  query GetCourtCaseByCourtCaseId($courtCaseId: String!) {
+    courtCaseByCourtCaseId(courtCaseId: $courtCaseId) {
+      courtCaseId
+      caseNumber
+      title
+      courtType
+      region
+      decisionDate
+      decisionType
+      decisionContent
+      link
+      description
+      originalCaseLink
+      subject
+      hasDecision
+      decisionLink
+      federalDistrict
+      plaintiff
+      defendant
+      thirdParties
+      representatives
+      judgeName
+      receivedDate
+      startDate
+      caseCategory
+      caseSubcategory
+      outcome
+      caseResult
+      articles {
+        articleNumber
+        description
+        outcome
+        part
+        point
+      }
+      movements {
+        eventName
+        eventResult
+        basis
+        eventDate
+      }
+      timestamp
+    }
+  }
+`;
 
 export default function CaseDetailPage() {
   const { id } = useParams();
-  const { state } = useLocation();
   const navigate = useNavigate();
-  const courtCase = state?.courtCase;
 
-  if (!courtCase) {
-    return (
-      <div className="page-container text-center">
-        <p className="text-body mb-md">Дело не найдено</p>
-        <button onClick={() => navigate('/analyze')} className="button">
-          Вернуться к поиску
-        </button>
-      </div>
-    );
-  }
+  const { loading, error, data } = useQuery(GET_COURT_CASE_BY_COURT_CASE_ID, {
+    variables: { courtCaseId: id },
+    skip: !id,
+    fetchPolicy: "network-only",
+  });
 
+  const courtCase = data?.courtCaseByCourtCaseId;
+
+  // Форматирование даты
   const formatDate = (dateString) => {
     if (!dateString) return 'Не указана';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU');
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? 'Неверная дата' : date.toLocaleDateString('ru-RU');
+    } catch {
+      return 'Неверная дата';
+    }
   };
 
+  // Тексты для исходов
   const getOutcomeText = (outcome) => {
     const outcomes = {
       Unknown: 'Неизвестно',
@@ -39,161 +89,332 @@ export default function CaseDetailPage() {
     return outcomes[outcome] || outcome;
   };
 
+  const getArticleOutcomeText = (outcome) => {
+    const outcomes = {
+      Unknown: '',
+      Applied: 'Применена',
+      NotApplied: 'Не применена',
+      PartiallyApplied: 'Частично применена'
+    };
+    return outcomes[outcome] || '';
+  };
+
+  // Загрузка
+  if (loading) {
+    return (
+      <div className="page-container text-center">
+        <div className="loading-spinner large"></div>
+        <p className="text-body mt-md">Загрузка дела...</p>
+        <div className="text-small text-muted mt-sm">
+          CourtCaseId: {id}
+        </div>
+      </div>
+    );
+  }
+
+  // Ошибка
+  if (error) {
+    return (
+      <div className="page-container text-center">
+        <div className="error-state">
+          <h3 className="text-error mb-md">Ошибка загрузки</h3>
+          <p className="text-body mb-lg">{error.message}</p>
+          
+          <div className="debug-info">
+            <strong>Детали:</strong>
+            <div className="mt-sm">
+              <div><strong>CourtCaseId:</strong> {id}</div>
+            </div>
+          </div>
+          
+          <div className="flex gap-md justify-center mt-lg">
+            <button onClick={() => window.location.reload()} className="button button-primary">
+              Повторить запрос
+            </button>
+            <button onClick={() => navigate('/analyze')} className="button button-outline">
+              Назад к поиску
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Не найдено
+  if (!courtCase) {
+    return (
+      <div className="page-container text-center">
+        <h3 className="text-subtitle mb-md">Дело не найдено</h3>
+        <p className="text-body mb-lg">Дело с CourtCaseId {id} не существует в системе</p>
+        <button onClick={() => navigate('/analyze')} className="button button-primary">
+          Назад к поиску
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="page-container">
-      <button 
-        onClick={() => navigate('/analyze')}
-        className="button-link mb-lg"
-      >
-        ← Назад к результатам
-      </button>
+      {/* Шапка */}
+      <div className="mb-lg">
+        <button 
+          onClick={() => navigate('/analyze')}
+          className="button button-link mb-md"
+        >
+          ← Назад к поиску
+        </button>
+        
+        <h1 className="text-title mb-md">
+          {courtCase.title || `Дело №${courtCase.caseNumber}`}
+        </h1>
+        
+        <div className="flex flex-wrap gap-sm mb-lg">
+          <span className="badge badge-primary">{courtCase.caseNumber}</span>
+          <span className="badge badge-secondary">{courtCase.courtType}</span>
+          {courtCase.region && <span className="badge badge-outline">{courtCase.region}</span>}
+        </div>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="fade-in"
       >
-        {/* Заголовок */}
-        <div className="mb-xl">
-          <h1 className="text-subtitle mb-md">
-            {courtCase.title}
-          </h1>
-          <div className="flex flex-wrap gap-md">
-            <span className="badge badge-primary">
-              {courtCase.caseNumber}
-            </span>
-            <span className="badge badge-secondary">
-              {courtCase.courtType}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-2 gap-lg">
-          {/* Левая колонка - основная информация */}
-          <div>
+        {/* Основной контент */}
+        <div className="grid grid-2 gap-xl">
+          {/* Левая колонка */}
+          <div className="space-y-lg">
             {/* Описание */}
-            <div className="mb-lg">
-              <h3 className="text-section mb-md">Описание дела</h3>
-              <p className="text-body">
-                {courtCase.description}
-              </p>
-            </div>
-
-            {/* Стороны процесса */}
-            <div className="mb-lg">
-              <h3 className="text-section mb-md">Стороны процесса</h3>
-              <div className="card-details">
-                <div className="mb-md">
-                  <strong className="text-success">Истец:</strong>
-                  <p className="text-body mt-sm">{courtCase.plaintiff}</p>
+            {courtCase.description && (
+              <section>
+                <h2 className="text-section mb-md">Описание дела</h2>
+                <div className="card p-md">
+                  <p className="text-body">{courtCase.description}</p>
                 </div>
-                <div className="mb-md">
-                  <strong className="text-danger">Ответчик:</strong>
-                  <p className="text-body mt-sm">{courtCase.defendant}</p>
-                </div>
-                {courtCase.thirdParties && (
-                  <div>
-                    <strong>Третьи лица:</strong>
-                    <p className="text-body mt-sm">{courtCase.thirdParties}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+              </section>
+            )}
 
             {/* Суть спора */}
-            <div className="mb-lg">
-              <h3 className="text-section mb-md">Суть спора</h3>
-              <p className="text-body">{courtCase.subject}</p>
-            </div>
+            {courtCase.subject && (
+              <section>
+                <h2 className="text-section mb-md">Суть спора</h2>
+                <div className="card p-md">
+                  <p className="text-body">{courtCase.subject}</p>
+                </div>
+              </section>
+            )}
+
+            {/* Текст решения */}
+            {courtCase.decisionContent && (
+              <section>
+                <h2 className="text-section mb-md">Текст решения</h2>
+                <div className="card p-md">
+                  <div className="decision-content">
+                    {courtCase.decisionContent}
+                  </div>
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Правая колонка - детали */}
-          <div>
+          {/* Правая колонка */}
+          <div className="space-y-lg">
             {/* Детали дела */}
-            <div className="card-details mb-lg">
-              <h3 className="text-section mb-md">Детали дела</h3>
-              
-              <div className="grid-auto">
-                <div><strong>Категория:</strong> {courtCase.caseCategory}</div>
-                <div><strong>Подкатегория:</strong> {courtCase.caseSubcategory}</div>
-                <div><strong>Федеральный округ:</strong> {courtCase.federalDistrict}</div>
-                <div><strong>Регион:</strong> {courtCase.region}</div>
-                <div><strong>Дата поступления:</strong> {formatDate(courtCase.receivedDate)}</div>
-                <div><strong>Дата начала:</strong> {formatDate(courtCase.startDate)}</div>
-                {courtCase.decisionDate && (
-                  <div><strong>Дата решения:</strong> {formatDate(courtCase.decisionDate)}</div>
-                )}
-                <div className={courtCase.outcome === 'PlaintiffWin' ? 'text-success' : 
-                               courtCase.outcome === 'DefendantWin' ? 'text-danger' : 'text-muted'}>
-                  <strong>Исход дела:</strong> {getOutcomeText(courtCase.outcome)}
+            <section>
+              <h2 className="text-section mb-md">Детали дела</h2>
+              <div className="card p-md">
+                <div className="space-y-sm">
+                  {courtCase.caseCategory && (
+                    <div className="flex-between">
+                      <strong>Категория:</strong>
+                      <span>{courtCase.caseCategory}</span>
+                    </div>
+                  )}
+                  {courtCase.caseSubcategory && (
+                    <div className="flex-between">
+                      <strong>Подкатегория:</strong>
+                      <span>{courtCase.caseSubcategory}</span>
+                    </div>
+                  )}
+                  {courtCase.region && (
+                    <div className="flex-between">
+                      <strong>Регион:</strong>
+                      <span>{courtCase.region}</span>
+                    </div>
+                  )}
+                  {courtCase.federalDistrict && (
+                    <div className="flex-between">
+                      <strong>Федеральный округ:</strong>
+                      <span>{courtCase.federalDistrict}</span>
+                    </div>
+                  )}
+                  {courtCase.judgeName && (
+                    <div className="flex-between">
+                      <strong>Судья:</strong>
+                      <span>{courtCase.judgeName}</span>
+                    </div>
+                  )}
+                  {courtCase.receivedDate && (
+                    <div className="flex-between">
+                      <strong>Дата поступления:</strong>
+                      <span>{formatDate(courtCase.receivedDate)}</span>
+                    </div>
+                  )}
+                  {courtCase.startDate && (
+                    <div className="flex-between">
+                      <strong>Дата начала:</strong>
+                      <span>{formatDate(courtCase.startDate)}</span>
+                    </div>
+                  )}
+                  {courtCase.decisionDate && (
+                    <div className="flex-between">
+                      <strong>Дата решения:</strong>
+                      <span>{formatDate(courtCase.decisionDate)}</span>
+                    </div>
+                  )}
+                  {courtCase.decisionType && (
+                    <div className="flex-between">
+                      <strong>Тип решения:</strong>
+                      <span>{courtCase.decisionType}</span>
+                    </div>
+                  )}
+                  <div className="flex-between">
+                    <strong>Исход дела:</strong>
+                    <span className={
+                      courtCase.outcome === 'PlaintiffWin' ? 'text-success' : 
+                      courtCase.outcome === 'DefendantWin' ? 'text-danger' : 
+                      'text-muted'
+                    }>
+                      {getOutcomeText(courtCase.outcome)}
+                    </span>
+                  </div>
+                  {courtCase.caseResult && (
+                    <div className="flex-between">
+                      <strong>Результат:</strong>
+                      <span>{courtCase.caseResult}</span>
+                    </div>
+                  )}
+                  <div className="flex-between">
+                    <strong>Наличие решения:</strong>
+                    <span>{courtCase.hasDecision ? '✅ Есть' : '❌ Нет'}</span>
+                  </div>
                 </div>
-                {courtCase.caseResult && (
-                  <div><strong>Результат:</strong> {courtCase.caseResult}</div>
-                )}
               </div>
-            </div>
+            </section>
+
+            {/* Стороны */}
+            <section>
+              <h2 className="text-section mb-md">Стороны процесса</h2>
+              <div className="card p-md">
+                <div className="space-y-md">
+                  {courtCase.plaintiff && (
+                    <div>
+                      <strong className="text-success">Истец:</strong>
+                      <p className="text-body mt-xs">{courtCase.plaintiff}</p>
+                    </div>
+                  )}
+                  {courtCase.defendant && (
+                    <div>
+                      <strong className="text-danger">Ответчик:</strong>
+                      <p className="text-body mt-xs">{courtCase.defendant}</p>
+                    </div>
+                  )}
+                  {courtCase.thirdParties && (
+                    <div>
+                      <strong>Третьи лица:</strong>
+                      <p className="text-body mt-xs">{courtCase.thirdParties}</p>
+                    </div>
+                  )}
+                  {courtCase.representatives && (
+                    <div>
+                      <strong>Представители:</strong>
+                      <p className="text-body mt-xs">{courtCase.representatives}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Статьи */}
+            {courtCase.articles && courtCase.articles.length > 0 && (
+              <section>
+                <h2 className="text-section mb-md">Примененные статьи</h2>
+                <div className="space-y-sm">
+                  {courtCase.articles.map((article, index) => (
+                    <div key={index} className="card p-sm">
+                      <div className="flex-between mb-xs">
+                        <strong>Статья {article.articleNumber}</strong>
+                        {article.outcome && article.outcome !== 'Unknown' && (
+                          <span className={`badge ${
+                            article.outcome === 'Applied' ? 'badge-success' : 
+                            article.outcome === 'NotApplied' ? 'badge-error' : 
+                            'badge-warning'
+                          }`}>
+                            {getArticleOutcomeText(article.outcome)}
+                          </span>
+                        )}
+                      </div>
+                      {article.description && (
+                        <p className="text-small text-muted">{article.description}</p>
+                      )}
+                      {(article.part || article.point) && (
+                        <p className="text-small">
+                          {[article.part, article.point].filter(Boolean).join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Ссылки */}
-            <div className="mb-lg">
-              <h3 className="text-section mb-md">Ссылки</h3>
+            <section>
+              <h2 className="text-section mb-md">Ссылки</h2>
               <div className="flex flex-col gap-sm">
-                <a 
-                  href={courtCase.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="button button-outline text-center"
-                >
-                  🔗 Карточка дела
-                </a>
+                {courtCase.link && (
+                  <a href={courtCase.link} target="_blank" rel="noopener noreferrer" className="button button-outline">
+                    🔗 Карточка дела
+                  </a>
+                )}
+                {courtCase.originalCaseLink && (
+                  <a href={courtCase.originalCaseLink} target="_blank" rel="noopener noreferrer" className="button button-outline">
+                    📋 Оригинальное дело
+                  </a>
+                )}
                 {courtCase.decisionLink && (
-                  <a 
-                    href={courtCase.decisionLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="button button-outline text-center"
-                    style={{ borderColor: '#28a745', color: '#28a745' }}
-                  >
+                  <a href={courtCase.decisionLink} target="_blank" rel="noopener noreferrer" className="button button-outline text-success">
                     📄 Текст решения
                   </a>
                 )}
               </div>
-            </div>
+            </section>
           </div>
         </div>
 
         {/* Движения дела */}
         {courtCase.movements && courtCase.movements.length > 0 && (
-          <div className="mt-lg">
-            <h3 className="text-section mb-md">Движения дела</h3>
+          <section className="mt-xl">
+            <h2 className="text-section mb-md">Хронология дела</h2>
             <div className="card">
               {courtCase.movements.map((movement, index) => (
-                <div 
-                  key={index}
-                  className={`p-md ${index % 2 === 0 ? 'bg-light' : ''} ${
-                    index < courtCase.movements.length - 1 ? 'border-bottom' : ''
-                  }`}
-                >
+                <div key={index} className={`p-md ${index % 2 === 0 ? 'bg-light' : ''}`}>
                   <div className="flex-between mb-sm">
-                    <strong className="text-body">{movement.eventName}</strong>
+                    <strong>{movement.eventName}</strong>
                     <span className="text-small text-muted">
                       {formatDate(movement.eventDate)}
                     </span>
                   </div>
                   {movement.eventResult && (
-                    <div className="text-body mb-sm">
-                      <strong>Результат:</strong> {movement.eventResult}
-                    </div>
+                    <p className="text-body mb-xs"><strong>Результат:</strong> {movement.eventResult}</p>
                   )}
                   {movement.basis && (
-                    <div className="text-small text-muted">
-                      <strong>Основание:</strong> {movement.basis}
-                    </div>
+                    <p className="text-small text-muted"><strong>Основание:</strong> {movement.basis}</p>
                   )}
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
       </motion.div>
     </div>

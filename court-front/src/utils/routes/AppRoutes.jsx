@@ -24,7 +24,6 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/analyze" element={<AnalyzePage />} />
         <Route path="/case/:id" element={<CaseDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RegionSelector from "./RegionSelector";
 
-const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = false }) => {
+const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compact = false }) => {
   const [activeSection, setActiveSection] = useState("basic");
 
   const sections = {
@@ -42,23 +42,15 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
     }
   };
 
-  const clearFilters = () => {
-    if (onFiltersChange) {
-      onFiltersChange({
-        searchText: "",
-        caseNumber: "",
-        plaintiff: "",
-        defendant: "",
-        regions: [],
-        courtTypes: [],
-        articles: [],
-        startDate: "",
-        endDate: "",
-        decisionStartDate: "",
-        decisionEndDate: "",
-        hasDecision: "",
-        legalNorms: ""
-      });
+  const handleSearchClick = () => {
+    if (onSearch) {
+      onSearch(filters);
+    }
+  };
+
+  const handleClearClick = () => {
+    if (onClear) {
+      onClear();
     }
   };
 
@@ -66,34 +58,12 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
     (Array.isArray(val) ? val.length > 0 : val !== "" && val !== null && val !== undefined)
   );
 
-  const handleQuickDate = (field, period) => {
-    const today = new Date();
-    let date;
-    switch (period) {
-      case "today":
-        date = today;
-        break;
-      case "week":
-        date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-        break;
-      case "month":
-        date = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-        break;
-      case "year":
-        date = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-        break;
-      default:
-        date = today;
-    }
-    handleInputChange(field, date.toISOString().split("T")[0]);
-  };
-
   return (
     <div className={`search-filters ${compact ? "compact" : ""}`}>
       {!compact && (
         <div className="filters-header">
           <h2>Расширенный поиск</h2>
-          <p>Уточните параметры для точного поиска судебных дел</p>
+          <p>Заполните параметры и нажмите "Найти дела" для поиска</p>
         </div>
       )}
 
@@ -102,6 +72,7 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
         {Object.entries(sections).map(([key, sec]) => (
           <button
             key={key}
+            type="button"
             className={`section-tab ${activeSection === key ? "active" : ""}`}
             onClick={() => setActiveSection(key)}
           >
@@ -126,7 +97,7 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Ключевые слова или описание"
+                  placeholder="Ключевые слова, номер дела, описание..."
                   value={filters.searchText || ""}
                   onChange={(e) => handleInputChange("searchText", e.target.value)}
                 />
@@ -138,15 +109,6 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
                   placeholder="А40-123456/2024 или 2-1234/2024"
                   value={filters.caseNumber || ""}
                   onChange={(e) => handleInputChange("caseNumber", e.target.value)}
-                />
-
-                <label className="form-label mt-md">Правовые нормы</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="ст. 15 ГК РФ, п. 3 ст. 401 ГК РФ..."
-                  value={filters.legalNorms || ""}
-                  onChange={(e) => handleInputChange("legalNorms", e.target.value)}
                 />
               </div>
             )}
@@ -194,100 +156,6 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
                     </button>
                   ))}
                 </div>
-
-                <label className="form-label mt-md">Дата принятия дела</label>
-                <div className="quick-dates">
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("startDate", "today")}
-                  >
-                    Сегодня
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("startDate", "week")}
-                  >
-                    Неделя
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("startDate", "month")}
-                  >
-                    Месяц
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("startDate", "year")}
-                  >
-                    Год
-                  </button>
-                </div>
-                <div className="date-inputs">
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={filters.startDate || ""}
-                    onChange={(e) => handleInputChange("startDate", e.target.value)}
-                  />
-                  <span className="date-separator">—</span>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={filters.endDate || ""}
-                    onChange={(e) => handleInputChange("endDate", e.target.value)}
-                  />
-                </div>
-
-                <label className="form-label mt-md">Дата решения</label>
-                <div className="quick-dates">
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("decisionStartDate", "today")}
-                  >
-                    Сегодня
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("decisionStartDate", "week")}
-                  >
-                    Неделя
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("decisionStartDate", "month")}
-                  >
-                    Месяц
-                  </button>
-                  <button
-                    type="button"
-                    className="quick-date"
-                    onClick={() => handleQuickDate("decisionStartDate", "year")}
-                  >
-                    Год
-                  </button>
-                </div>
-                <div className="date-inputs">
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={filters.decisionStartDate || ""}
-                    onChange={(e) => handleInputChange("decisionStartDate", e.target.value)}
-                  />
-                  <span className="date-separator">—</span>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={filters.decisionEndDate || ""}
-                    onChange={(e) => handleInputChange("decisionEndDate", e.target.value)}
-                  />
-                </div>
               </div>
             )}
 
@@ -306,43 +174,6 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
                     </button>
                   ))}
                 </div>
-
-                <label className="form-label mt-md">Наличие решения</label>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="hasDecision"
-                      value=""
-                      checked={(filters.hasDecision || "") === ""}
-                      onChange={(e) => handleInputChange("hasDecision", e.target.value)}
-                    />
-                    <span className="radio-custom"></span>
-                    Не важно
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="hasDecision"
-                      value="yes"
-                      checked={(filters.hasDecision || "") === "yes"}
-                      onChange={(e) => handleInputChange("hasDecision", e.target.value)}
-                    />
-                    <span className="radio-custom"></span>
-                    С решением
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="hasDecision"
-                      value="no"
-                      checked={(filters.hasDecision || "") === "no"}
-                      onChange={(e) => handleInputChange("hasDecision", e.target.value)}
-                    />
-                    <span className="radio-custom"></span>
-                    Без решения
-                  </label>
-                </div>
               </div>
             )}
           </motion.div>
@@ -355,7 +186,7 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
           <button 
             type="button"
             className="button button-clear" 
-            onClick={clearFilters}
+            onClick={handleClearClick}
           >
             Очистить фильтры
           </button>
@@ -363,9 +194,9 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, compact = fals
         <button 
           type="button"
           className="button button-primary" 
-          onClick={() => onSearch && onSearch(filters)}
+          onClick={handleSearchClick}
         >
-          Найти дела
+          🔍 Найти дела
         </button>
       </div>
 

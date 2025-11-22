@@ -16,9 +16,16 @@ export default function CaseCard({ courtCase }) {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
+  // Обработчик клика по карточке
+  const handleCardClick = () => {
+    // Используем courtCaseId из Elasticsearch если есть, иначе обычный id
+    const caseId = courtCase.courtCaseId || courtCase.id;
+    navigate(`/case/${caseId}`);
+  };
+
   return (
     <motion.div 
-      onClick={() => navigate(`/case/${courtCase.id}`)}
+      onClick={handleCardClick}
       style={{
         border: '1px solid #e1e5e9',
         borderRadius: '12px',
