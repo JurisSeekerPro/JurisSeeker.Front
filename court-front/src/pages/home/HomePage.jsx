@@ -7,7 +7,7 @@ import Pagination from "../../components/Pagination";
 import SearchFilters from "../../components/filters/SearchFilters";
 import "../../styles/components.css";
 
-// Запрос без фильтрации для начальной загрузки
+// Базовый запрос с минимальными полями
 const GET_COURT_CASES_SIMPLE = gql`
   query GetCourtCasesSimple(
     $first: Int
@@ -20,48 +20,15 @@ const GET_COURT_CASES_SIMPLE = gql`
       edges {
         node {
           id
-          title
           caseNumber
-          courtType
           plaintiff
           defendant
           region
-        }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-      }
-    }
-  }
-`;
-
-// Запрос с фильтрацией
-const GET_COURT_CASES_WITH_FILTERS = gql`
-  query GetCourtCasesWithFilters(
-    $first: Int
-    $after: String
-    $region: String
-    $courtType: String
-    $caseNumber: String
-  ) {
-    courtCases(
-      first: $first
-      after: $after
-      where: {
-        ${"" /* Фильтры будут добавлены динамически */}
-      }
-    ) {
-      edges {
-        node {
-          id
-          title
-          caseNumber
+          startDate
+          receivedDate
+          hasDecision
+          judgeName
           courtType
-          plaintiff
-          defendant
-          region
         }
       }
       pageInfo {
@@ -82,14 +49,10 @@ export default function HomePage() {
     plaintiff: "",
     defendant: "",
     regions: [],
-    courtTypes: [],
-    articles: [],
-    startDate: "",
-    endDate: "",
-    decisionStartDate: "",
-    decisionEndDate: "",
-    hasDecision: "",
-    legalNorms: ""
+    judgeName: "",
+    dateFrom: "",
+    dateTo: "",
+    hasDecision: null,
   });
 
   const [activeFilters, setActiveFilters] = useState({});
@@ -98,7 +61,7 @@ export default function HomePage() {
   const [searchPerformed, setSearchPerformed] = useState(false);
   const casesPerPage = 10;
 
-  // Динамически формируем запрос в зависимости от наличия фильтров
+  // Динамически формируем запрос
   const { query, variables } = useMemo(() => {
     if (!searchPerformed) {
       return { query: null, variables: null };
@@ -112,33 +75,62 @@ export default function HomePage() {
     const filterConditions = [];
     const filterVars = { ...baseVars };
 
-    // Добавляем фильтры только если они есть
+    // Добавляем фильтры по одному для надежности
     if (activeFilters.regions?.length > 0) {
       filterConditions.push(`region: { eq: $region }`);
       filterVars.region = activeFilters.regions[0];
-    }
-    
-    if (activeFilters.courtTypes?.length > 0) {
-      filterConditions.push(`courtType: { eq: $courtType }`);
-      filterVars.courtType = activeFilters.courtTypes[0];
     }
     
     if (activeFilters.caseNumber?.trim()) {
       filterConditions.push(`caseNumber: { contains: $caseNumber }`);
       filterVars.caseNumber = activeFilters.caseNumber.trim();
     }
+    
+    if (activeFilters.plaintiff?.trim()) {
+      filterConditions.push(`plaintiff: { contains: $plaintiff }`);
+      filterVars.plaintiff = activeFilters.plaintiff.trim();
+    }
+    
+    if (activeFilters.defendant?.trim()) {
+      filterConditions.push(`defendant: { contains: $defendant }`);
+      filterVars.defendant = activeFilters.defendant.trim();
+    }
+    
+    if (activeFilters.judgeName?.trim()) {
+      filterConditions.push(`judgeName: { contains: $judgeName }`);
+      filterVars.judgeName = activeFilters.judgeName.trim();
+    }
+    
+    if (activeFilters.hasDecision !== null && activeFilters.hasDecision !== undefined) {
+      filterConditions.push(`hasDecision: { eq: $hasDecision }`);
+      filterVars.hasDecision = activeFilters.hasDecision === true || activeFilters.hasDecision === "true";
+    }
+    
+    // Диапазон дат - добавляем только если есть обе даты
+    if (activeFilters.dateFrom && activeFilters.dateTo) {
+      filterConditions.push(`receivedDate: { gte: $dateFrom, lte: $dateTo }`);
+      filterVars.dateFrom = activeFilters.dateFrom;
+      filterVars.dateTo = activeFilters.dateTo;
+    }
 
     // Если есть фильтры - используем запрос с фильтрацией, иначе простой запрос
     let dynamicQuery;
     if (filterConditions.length > 0) {
       const whereClause = filterConditions.join("\n        ");
-      dynamicQuery = gql`
+      
+      // Формируем динамический запрос
+      const queryString = `
         query GetCourtCasesWithFilters(
           $first: Int
           $after: String
           ${filterVars.region ? '$region: String' : ''}
-          ${filterVars.courtType ? '$courtType: String' : ''}
           ${filterVars.caseNumber ? '$caseNumber: String' : ''}
+          ${filterVars.plaintiff ? '$plaintiff: String' : ''}
+          ${filterVars.defendant ? '$defendant: String' : ''}
+          ${filterVars.judgeName ? '$judgeName: String' : ''}
+          ${filterVars.hasDecision !== undefined ? '$hasDecision: Boolean' : ''}
+          ${filterVars.dateFrom ? '$dateFrom: String' : ''}
+          ${filterVars.dateTo ? '$dateTo: String' : ''}
         ) {
           courtCases(
             first: $first
@@ -150,12 +142,15 @@ export default function HomePage() {
             edges {
               node {
                 id
-                title
                 caseNumber
-                courtType
                 plaintiff
                 defendant
                 region
+                startDate
+                receivedDate
+                hasDecision
+                judgeName
+                courtType
               }
             }
             pageInfo {
@@ -166,16 +161,15 @@ export default function HomePage() {
           }
         }
       `;
+      
+      dynamicQuery = gql(queryString);
     } else {
       dynamicQuery = GET_COURT_CASES_SIMPLE;
     }
 
     console.log("=== GRAPHQL ЗАПРОС ===");
-    console.log("Строка запроса:");
-    console.log(dynamicQuery.loc?.source.body);
     console.log("Переменные:", JSON.stringify(filterVars, null, 2));
     console.log("Активные фильтры:", activeFilters);
-    console.log("Используется запрос с фильтрами:", filterConditions.length > 0);
     console.log("====================");
 
     return { 
@@ -189,13 +183,10 @@ export default function HomePage() {
     skip: !searchPerformed || !query,
     fetchPolicy: "network-only",
     onCompleted: (res) => {
-      console.log("GraphQL ответ:", res);
+      console.log("Получено дел:", res.courtCases?.edges?.length || 0);
     },
     onError: (err) => {
-      console.error("GraphQL ошибка:", err);
-      console.error("Детали ошибки:", err.message);
-      console.error("Сетевые детали:", err.networkError);
-      console.error("Граф ошибки:", err.graphQLErrors);
+      console.error("GraphQL ошибка:", err.message);
     },
   });
 
@@ -217,13 +208,49 @@ export default function HomePage() {
   };
 
   const handleFilterChange = (newFilters) => {
-    console.log("Filters changed:", newFilters);
     setFilters(newFilters || {});
   };
 
   const handleSearch = (searchFilters) => {
     console.log("Search with filters:", searchFilters);
-    setActiveFilters(searchFilters);
+    
+    // Формируем безопасные фильтры
+    const safeFilters = {};
+    
+    // Добавляем только те фильтры, которые точно есть
+    if (searchFilters.caseNumber?.trim()) {
+      safeFilters.caseNumber = searchFilters.caseNumber.trim();
+    }
+    
+    if (searchFilters.plaintiff?.trim()) {
+      safeFilters.plaintiff = searchFilters.plaintiff.trim();
+    }
+    
+    if (searchFilters.defendant?.trim()) {
+      safeFilters.defendant = searchFilters.defendant.trim();
+    }
+    
+    if (searchFilters.judgeName?.trim()) {
+      safeFilters.judgeName = searchFilters.judgeName.trim();
+    }
+    
+    if (searchFilters.regions?.length > 0) {
+      safeFilters.regions = searchFilters.regions;
+    }
+    
+    if (searchFilters.hasDecision !== null && searchFilters.hasDecision !== undefined) {
+      safeFilters.hasDecision = searchFilters.hasDecision;
+    }
+    
+    // Диапазон дат - только если есть обе даты
+    if (searchFilters.dateFrom && searchFilters.dateTo) {
+      safeFilters.dateFrom = searchFilters.dateFrom;
+      safeFilters.dateTo = searchFilters.dateTo;
+    }
+    
+    console.log("Применяемые фильтры:", safeFilters);
+    
+    setActiveFilters(safeFilters);
     setSearchPerformed(true);
   };
 
@@ -236,14 +263,10 @@ export default function HomePage() {
       plaintiff: "",
       defendant: "",
       regions: [],
-      courtTypes: [],
-      articles: [],
-      startDate: "",
-      endDate: "",
-      decisionStartDate: "",
-      decisionEndDate: "",
-      hasDecision: "",
-      legalNorms: ""
+      judgeName: "",
+      dateFrom: "",
+      dateTo: "",
+      hasDecision: null,
     });
     setPage(1);
     setCursors([]);
@@ -264,66 +287,39 @@ export default function HomePage() {
         compact={false}
       />
 
-      {/* Состояние до поиска */}
-      {!searchPerformed && (
-        <div className="search-prompt">
-          <div className="prompt-content">
-            <h3>Начните поиск судебных дел</h3>
-            <p>Заполните фильтры и нажмите кнопку "Найти дела" для отображения результатов</p>
-            <div className="prompt-features">
-              <div className="feature">
-                <span className="feature-icon">🗺️</span>
-                <span>Фильтрация по регионам России</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">⚖️</span>
-                <span>Выбор типа суда</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">🔢</span>
-                <span>Поиск по номеру дела</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Состояние после поиска */}
       {searchPerformed && (
         <>
-          {loading && <p className="text-body">Загрузка судебных дел...</p>}
+          {loading && (
+            <div className="text-center py-8">
+              <div className="spinner mx-auto"></div>
+              <p className="mt-4">Загрузка судебных дел...</p>
+            </div>
+          )}
+          
           {error && (
             <div className="text-body text-error">
-              <p>Ошибка загрузки: {error.message}</p>
-              <div style={{ marginTop: '10px', padding: '10px', background: '#f8f9fa', borderRadius: '4px' }}>
-                <strong>Отладочная информация:</strong>
-                <div style={{ marginTop: '5px', fontSize: '0.9rem' }}>
-                  Проверьте консоль браузера для деталей запроса
-                </div>
+              <div className="p-4 border border-red-300 rounded-lg bg-red-50">
+                <p className="font-bold">Ошибка загрузки:</p>
+                <p className="mt-1">{error.message}</p>
+                <button 
+                  className="button button-primary mt-3"
+                  onClick={() => refetch()}
+                >
+                  Повторить запрос
+                </button>
+                <button 
+                  className="button button-clear ml-2 mt-3"
+                  onClick={handleClearSearch}
+                >
+                  Очистить фильтры
+                </button>
               </div>
-              <button 
-                className="button button-primary"
-                onClick={() => refetch()}
-                style={{marginTop: '10px'}}
-              >
-                Повторить запрос
-              </button>
             </div>
           )}
 
-          {currentCases && currentCases.length > 0 ? (
+          {!loading && !error && currentCases && currentCases.length > 0 ? (
             <>
-              <div className="search-results-header">
-                <h2>Результаты поиска</h2>
-                <p>Найдено дел: {currentCases.length}</p>
-                <button 
-                  className="button button-clear"
-                  onClick={handleClearSearch}
-                >
-                  Очистить результаты
-                </button>
-              </div>
-
               <div className="case-list mb-lg">
                 {currentCases.map((courtCase) => (
                   <CaseCard key={courtCase.id} courtCase={courtCase} />
@@ -338,16 +334,20 @@ export default function HomePage() {
               />
             </>
           ) : (
-            !loading && (
-              <div className="no-results">
+            !loading && !error && (
+              <div className="no-results text-center py-12">
                 <h3>Ничего не найдено</h3>
-                <p>Попробуйте изменить параметры поиска или очистить фильтры</p>
-                <button 
-                  className="button button-primary"
-                  onClick={handleClearSearch}
-                >
-                  Очистить поиск
-                </button>
+                <p className="text-gray-600 mt-2 mb-4">
+                  Попробуйте изменить параметры поиска
+                </p>
+                <div className="space-x-2">
+                  <button 
+                    className="button button-primary"
+                    onClick={handleClearSearch}
+                  >
+                    Очистить фильтры
+                  </button>
+                </div>
               </div>
             )
           )}

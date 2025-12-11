@@ -1,26 +1,25 @@
 // src/components/filters/SearchFilters.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RegionSelector from "./RegionSelector";
 
 const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compact = false }) => {
   const [activeSection, setActiveSection] = useState("basic");
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
 
   const sections = {
     basic: { label: "Основные параметры" },
-    parties: { label: "Стороны процесса" },
-    court: { label: "Суд и даты" },
-    legal: { label: "Правовые нормы" }
+    dates: { label: "Даты" },
+    regions: { label: "Регионы" }
   };
 
-  const courtTypes = [
-    "Арбитражный суд", "Суд общей юрисдикции", "Мировой суд",
-    "Районный суд", "Областной суд", "Верховный суд"
-  ];
-
-  const legalArticles = [
-    "ГК РФ Статья 434", "ГК РФ Статья 450", "ГК РФ Статья 451",
-    "АПК РФ Статья 125", "ГПК РФ Статья 131", "КоАП РФ Статья 14.1"
+  const dateRanges = [
+    { label: "За последние 3 месяца", value: "3months" },
+    { label: "За последние 6 месяцев", value: "6months" },
+    { label: "За текущий год", value: "currentYear" },
+    { label: "За прошлый год", value: "lastYear" },
+    { label: "Произвольный период", value: "custom" }
   ];
 
   const safeArray = (arr) => Array.isArray(arr) ? arr : [];
@@ -42,6 +41,36 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
     }
   };
 
+  const handleDateRangeToggle = (value) => {
+    const arr = safeArray(filters.dateRanges);
+    let newArr;
+    
+    if (value === "custom") {
+      newArr = arr.includes(value) 
+        ? arr.filter(x => x !== value) 
+        : [...arr, value];
+    } else {
+      if (arr.includes(value)) {
+        newArr = arr.filter(x => x !== value);
+      } else {
+        newArr = [value, ...arr.filter(x => x === "custom")];
+      }
+    }
+    
+    if (onFiltersChange) {
+      onFiltersChange({ ...filters, dateRanges: newArr });
+    }
+  };
+
+  const handleHasDecisionChange = (value) => {
+    if (onFiltersChange) {
+      onFiltersChange({ 
+        ...filters, 
+        hasDecision: value === filters.hasDecision ? null : value 
+      });
+    }
+  };
+
   const handleSearchClick = () => {
     if (onSearch) {
       onSearch(filters);
@@ -51,6 +80,12 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
   const handleClearClick = () => {
     if (onClear) {
       onClear();
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchClick();
     }
   };
 
@@ -100,6 +135,7 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
                   placeholder="Ключевые слова, номер дела, описание..."
                   value={filters.searchText || ""}
                   onChange={(e) => handleInputChange("searchText", e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
 
                 <label className="form-label mt-md">Номер дела</label>
@@ -109,21 +145,32 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
                   placeholder="А40-123456/2024 или 2-1234/2024"
                   value={filters.caseNumber || ""}
                   onChange={(e) => handleInputChange("caseNumber", e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
-              </div>
-            )}
 
-            {activeSection === "parties" && (
-              <div className="section-panel">
-                <label className="form-label">Истец</label>
+                {/* Судья */}
+                <label className="form-label mt-md">Судья</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="ФИО судьи"
+                  value={filters.judgeName || ""}
+                  onChange={(e) => handleInputChange("judgeName", e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+
+                {/* Истец */}
+                <label className="form-label mt-md">Истец</label>
                 <input
                   type="text"
                   className="form-input"
                   placeholder="Наименование или ФИО истца"
                   value={filters.plaintiff || ""}
                   onChange={(e) => handleInputChange("plaintiff", e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
 
+                {/* Ответчик */}
                 <label className="form-label mt-md">Ответчик</label>
                 <input
                   type="text"
@@ -131,49 +178,76 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
                   placeholder="Наименование или ФИО ответчика"
                   value={filters.defendant || ""}
                   onChange={(e) => handleInputChange("defendant", e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
 
-                <label className="form-label mt-md">Регион рассмотрения</label>
+                {/* Чекбокс наличия решения */}
+                <div className="mt-md">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={filters.hasDecision === true}
+                      onChange={(e) => handleHasDecisionChange(e.target.checked ? true : null)}
+                    />
+                    <span className="checkbox-custom"></span>
+                    <span className="checkbox-text">Только дела с решением</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "dates" && (
+              <div className="section-panel">
+                {/* Даты */}
+                <label className="form-label">Период поступления дела</label>
+                <div className="chips-grid">
+                  {dateRanges.map(range => (
+                    <button
+                      key={range.value}
+                      type="button"
+                      className={`chip ${safeArray(filters.dateRanges).includes(range.value) ? "active" : ""}`}
+                      onClick={() => handleDateRangeToggle(range.value)}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Произвольные даты */}
+                {safeArray(filters.dateRanges).includes("custom") && (
+                  <div className="custom-dates mt-md">
+                    <div className="date-range-group">
+                      <div className="date-input-group">
+                        <label className="form-label-sm">Дата поступления с</label>
+                        <input
+                          type="date"
+                          className="form-input"
+                          value={filters.dateFrom || ""}
+                          onChange={(e) => handleInputChange("dateFrom", e.target.value)}
+                        />
+                      </div>
+                      <div className="date-input-group">
+                        <label className="form-label-sm">Дата поступления по</label>
+                        <input
+                          type="date"
+                          className="form-input"
+                          value={filters.dateTo || ""}
+                          onChange={(e) => handleInputChange("dateTo", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeSection === "regions" && (
+              <div className="section-panel">
+                <label className="form-label">Регион рассмотрения</label>
                 <RegionSelector
                   selectedRegions={safeArray(filters.regions)}
                   onRegionsChange={(arr) => handleInputChange("regions", arr)}
                 />
-              </div>
-            )}
-
-            {activeSection === "court" && (
-              <div className="section-panel">
-                <label className="form-label">Тип суда</label>
-                <div className="chips-grid">
-                  {courtTypes.map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      className={`chip ${safeArray(filters.courtTypes).includes(type) ? "active" : ""}`}
-                      onClick={() => handleArrayToggle("courtTypes", type)}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeSection === "legal" && (
-              <div className="section-panel">
-                <label className="form-label">Статьи и нормы</label>
-                <div className="chips-grid">
-                  {legalArticles.map(article => (
-                    <button
-                      key={article}
-                      type="button"
-                      className={`chip ${safeArray(filters.articles).includes(article) ? "active" : ""}`}
-                      onClick={() => handleArrayToggle("articles", article)}
-                    >
-                      {article}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
           </motion.div>
@@ -182,21 +256,19 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
 
       {/* Кнопки действий */}
       <div className="filters-actions">
-        {hasActiveFilters && (
-          <button 
-            type="button"
-            className="button button-clear" 
-            onClick={handleClearClick}
-          >
-            Очистить фильтры
-          </button>
-        )}
+        <button 
+          type="button"
+          className="button button-clear" 
+          onClick={handleClearClick}
+        >
+          Очистить фильтры
+        </button>
         <button 
           type="button"
           className="button button-primary" 
           onClick={handleSearchClick}
         >
-          🔍 Найти дела
+          Найти дела
         </button>
       </div>
 
@@ -209,6 +281,9 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
           {filters.caseNumber && (
             <span className="active-filter">Дело: {filters.caseNumber}</span>
           )}
+          {filters.judgeName && (
+            <span className="active-filter">Судья: {filters.judgeName}</span>
+          )}
           {filters.plaintiff && (
             <span className="active-filter">Истец: {filters.plaintiff}</span>
           )}
@@ -218,12 +293,20 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
           {safeArray(filters.regions).map(r => (
             <span key={r} className="active-filter">Регион: {r}</span>
           ))}
-          {safeArray(filters.courtTypes).map(t => (
-            <span key={t} className="active-filter">Суд: {t}</span>
-          ))}
-          {safeArray(filters.articles).map(a => (
-            <span key={a} className="active-filter">Статья: {a}</span>
-          ))}
+          {safeArray(filters.dateRanges).map(value => {
+            const range = dateRanges.find(r => r.value === value);
+            return range && (
+              <span key={value} className="active-filter">Период: {range.label}</span>
+            );
+          })}
+          {(filters.dateFrom || filters.dateTo) && (
+            <span className="active-filter">
+              Дата поступления: {filters.dateFrom || "..."} - {filters.dateTo || "..."}
+            </span>
+          )}
+          {filters.hasDecision === true && (
+            <span className="active-filter">Только с решением</span>
+          )}
         </div>
       )}
     </div>

@@ -88,7 +88,6 @@ export const buildGraphQLSearchQuery = (filters) => {
         region
         courtType
         articles
-        decisionDate
         hasDecision
       }
     }

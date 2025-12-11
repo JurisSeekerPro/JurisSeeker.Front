@@ -4,8 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { motion } from 'framer-motion';
+import './../styles/case-detail.css';
 
-// GraphQL запрос для получения дела по CourtCaseId
+// GraphQL запрос
 const GET_COURT_CASE_BY_COURT_CASE_ID = gql`
   query GetCourtCaseByCourtCaseId($courtCaseId: String!) {
     courtCaseByCourtCaseId(courtCaseId: $courtCaseId) {
@@ -14,7 +15,6 @@ const GET_COURT_CASE_BY_COURT_CASE_ID = gql`
       title
       courtType
       region
-      decisionDate
       decisionType
       decisionContent
       link
@@ -70,7 +70,12 @@ export default function CaseDetailPage() {
     if (!dateString) return 'Не указана';
     try {
       const date = new Date(dateString);
-      return isNaN(date.getTime()) ? 'Неверная дата' : date.toLocaleDateString('ru-RU');
+      return isNaN(date.getTime()) ? 'Неверная дата' : 
+        date.toLocaleDateString('ru-RU', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
     } catch {
       return 'Неверная дата';
     }
@@ -84,9 +89,19 @@ export default function CaseDetailPage() {
       DefendantWin: 'Выиграл ответчик',
       PartiallyGranted: 'Частично удовлетворено',
       Dismissed: 'Отказано',
-      Returned: 'Возвращено'
+      Returned: 'Возвращено',
+      PlaintiffWon: 'Выиграл истец',
+      DefendantWon: 'Выиграл ответчик',
+      Settlement: 'Мировое соглашение',
+      CaseDismissed: 'Дело прекращено'
     };
     return outcomes[outcome] || outcome;
+  };
+
+  const getOutcomeClass = (outcome) => {
+    if (outcome === 'PlaintiffWin' || outcome === 'PlaintiffWon') return 'success';
+    if (outcome === 'DefendantWin' || outcome === 'DefendantWon') return 'danger';
+    return 'muted';
   };
 
   const getArticleOutcomeText = (outcome) => {
@@ -99,14 +114,23 @@ export default function CaseDetailPage() {
     return outcomes[outcome] || '';
   };
 
+  const getArticleOutcomeClass = (outcome) => {
+    if (outcome === 'Applied') return 'applied';
+    if (outcome === 'NotApplied') return 'not-applied';
+    if (outcome === 'PartiallyApplied') return 'partial';
+    return '';
+  };
+
   // Загрузка
   if (loading) {
     return (
-      <div className="page-container text-center">
-        <div className="loading-spinner large"></div>
-        <p className="text-body mt-md">Загрузка дела...</p>
-        <div className="text-small text-muted mt-sm">
-          CourtCaseId: {id}
+      <div className="case-detail-page">
+        <div className="loading-state">
+          <div className="loading-spinner large"></div>
+          <p className="text-body mt-md">Загрузка дела...</p>
+          <div className="text-small text-muted mt-sm">
+            CourtCaseId: {id}
+          </div>
         </div>
       </div>
     );
@@ -115,19 +139,20 @@ export default function CaseDetailPage() {
   // Ошибка
   if (error) {
     return (
-      <div className="page-container text-center">
+      <div className="case-detail-page">
         <div className="error-state">
-          <h3 className="text-error mb-md">Ошибка загрузки</h3>
-          <p className="text-body mb-lg">{error.message}</p>
+          <div className="error-icon">⚠️</div>
+          <h3 className="error-title mb-md">Ошибка загрузки</h3>
+          <p className="error-message">{error.message}</p>
           
-          <div className="debug-info">
+          <div className="debug-info bg-light p-md rounded mb-lg">
             <strong>Детали:</strong>
             <div className="mt-sm">
               <div><strong>CourtCaseId:</strong> {id}</div>
             </div>
           </div>
           
-          <div className="flex gap-md justify-center mt-lg">
+          <div className="button-group">
             <button onClick={() => window.location.reload()} className="button button-primary">
               Повторить запрос
             </button>
@@ -143,35 +168,68 @@ export default function CaseDetailPage() {
   // Не найдено
   if (!courtCase) {
     return (
-      <div className="page-container text-center">
-        <h3 className="text-subtitle mb-md">Дело не найдено</h3>
-        <p className="text-body mb-lg">Дело с CourtCaseId {id} не существует в системе</p>
-        <button onClick={() => navigate('/analyze')} className="button button-primary">
-          Назад к поиску
-        </button>
+      <div className="case-detail-page">
+        <div className="error-state">
+          <h3 className="error-title mb-md">Дело не найдено</h3>
+          <p className="error-message">Дело с CourtCaseId {id} не существует в системе</p>
+          <button onClick={() => navigate('/analyze')} className="button button-primary">
+            Назад к поиску
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container">
+    <div className="case-detail-page">
       {/* Шапка */}
-      <div className="mb-lg">
+    <div className="case-header">
         <button 
-          onClick={() => navigate('/analyze')}
-          className="button button-link mb-md"
+          onClick={() => navigate('/')}
+          className="back-button"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 18px',
+            marginBottom: '24px',
+            background: '#f8f9fa',
+            border: '1px solid #dee2e6',
+            borderRadius: '8px',
+            color: '#495057',
+            textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            outline: 'none',
+            lineHeight: '1.5',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+            transition: 'all 0.2s ease'
+          }}
         >
           ← Назад к поиску
         </button>
         
-        <h1 className="text-title mb-md">
+        <h1 
+          className="case-title"
+          style={{
+            fontSize: '28px',
+            fontWeight: '700',
+            color: '#1a1a1a',
+            marginBottom: '20px',
+            lineHeight: '1.3',
+            width: '100%',
+            wordBreak: 'break-word'
+          }}
+        >
           {courtCase.title || `Дело №${courtCase.caseNumber}`}
         </h1>
         
-        <div className="flex flex-wrap gap-sm mb-lg">
-          <span className="badge badge-primary">{courtCase.caseNumber}</span>
-          <span className="badge badge-secondary">{courtCase.courtType}</span>
-          {courtCase.region && <span className="badge badge-outline">{courtCase.region}</span>}
+        <div className="case-meta">
+          <span className="case-badge">{courtCase.caseNumber}</span>
+          {courtCase.courtType && <span className="case-badge secondary">{courtCase.courtType}</span>}
+          {courtCase.region && <span className="case-badge outline">{courtCase.region}</span>}
         </div>
       </div>
 
@@ -181,241 +239,367 @@ export default function CaseDetailPage() {
         transition={{ duration: 0.4 }}
       >
         {/* Основной контент */}
-        <div className="grid grid-2 gap-xl">
+        <div className="case-content">
           {/* Левая колонка */}
-          <div className="space-y-lg">
+          <div className="case-left-column">
             {/* Описание */}
             {courtCase.description && (
-              <section>
-                <h2 className="text-section mb-md">Описание дела</h2>
-                <div className="card p-md">
-                  <p className="text-body">{courtCase.description}</p>
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Описание дела</h2>
                 </div>
-              </section>
+                <div className="section-body">
+                  <p className="text-multiline">{courtCase.description}</p>
+                </div>
+              </div>
             )}
 
             {/* Суть спора */}
             {courtCase.subject && (
-              <section>
-                <h2 className="text-section mb-md">Суть спора</h2>
-                <div className="card p-md">
-                  <p className="text-body">{courtCase.subject}</p>
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Суть спора</h2>
                 </div>
-              </section>
+                <div className="section-body">
+                  <p className="text-multiline">{courtCase.subject}</p>
+                </div>
+              </div>
             )}
 
-            {/* Текст решения */}
-            {courtCase.decisionContent && (
-              <section>
-                <h2 className="text-section mb-md">Текст решения</h2>
-                <div className="card p-md">
-                  <div className="decision-content">
-                    {courtCase.decisionContent}
+            {/* Стороны процесса (красивая карточка) */}
+            {(courtCase.plaintiff || courtCase.defendant || courtCase.thirdParties || courtCase.representatives) && (
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Стороны процесса</h2>
+                </div>
+                <div className="section-body">
+                  <div className="names-grid">
+                    {courtCase.plaintiff && (
+                      <div className="name-card plaintiff">
+                        <div className="name-header">
+                          <div className="name-icon plaintiff">👤</div>
+                          <div className="name-title">Истец</div>
+                        </div>
+                        <div className="name-content text-multiline">
+                          {courtCase.plaintiff.split(';').map((name, index) => (
+                            <div key={index} className="name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {courtCase.defendant && (
+                      <div className="name-card defendant">
+                        <div className="name-header">
+                          <div className="name-icon defendant">⚖️</div>
+                          <div className="name-title">Ответчик</div>
+                        </div>
+                        <div className="name-content text-multiline">
+                          {courtCase.defendant.split(';').map((name, index) => (
+                            <div key={index} className="name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {courtCase.thirdParties && (
+                      <div className="name-card third">
+                        <div className="name-header">
+                          <div className="name-icon third">👥</div>
+                          <div className="name-title">Третьи лица</div>
+                        </div>
+                        <div className="name-content text-multiline">
+                          {courtCase.thirdParties.split(';').map((name, index) => (
+                            <div key={index} className="name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {courtCase.representatives && (
+                      <div className="name-card representative">
+                        <div className="name-header">
+                          <div className="name-icon representative">👨‍⚖️</div>
+                          <div className="name-title">Представители</div>
+                        </div>
+                        <div className="name-content text-multiline">
+                          {courtCase.representatives.split(';').map((name, index) => (
+                            <div key={index} className="name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </section>
+              </div>
+            )}
+           
+
+            {/* Хронология дела */}
+            {courtCase.movements && courtCase.movements.length > 0 && (
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Хронология дела</h2>
+                </div>
+                <div className="section-body">
+                  <div className="timeline">
+                    {courtCase.movements.map((movement, index) => (
+                      <div key={index} className="timeline-item">
+                        <div className="timeline-header">
+                          <div className="event-name">{movement.eventName}</div>
+                          <div className="event-date">{formatDate(movement.eventDate)}</div>
+                        </div>
+                        {movement.eventResult && (
+                          <div className="event-result">
+                            <strong>Результат:</strong> {movement.eventResult}
+                          </div>
+                        )}
+                        {movement.basis && (
+                          <div className="event-basis">
+                            <strong>Основание:</strong> {movement.basis}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+
+             {/* Текст решения */}
+            {courtCase.decisionContent && (
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Текст решения</h2>
+                </div>
+                <div className="section-body">
+                  <div className="decision-content-wrapper">
+                    <div className="decision-text">
+                      {courtCase.decisionContent}
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
           {/* Правая колонка */}
-          <div className="space-y-lg">
+          <div className="case-right-column">
             {/* Детали дела */}
-            <section>
-              <h2 className="text-section mb-md">Детали дела</h2>
-              <div className="card p-md">
-                <div className="space-y-sm">
+            <div className="case-section">
+              <div className="section-header">
+                <h2 className="section-title">Детали дела</h2>
+              </div>
+              <div className="section-body">
+                <div className="details-grid">
                   {courtCase.caseCategory && (
-                    <div className="flex-between">
-                      <strong>Категория:</strong>
-                      <span>{courtCase.caseCategory}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Категория:</div>
+                      <div className="detail-value">{courtCase.caseCategory}</div>
                     </div>
                   )}
                   {courtCase.caseSubcategory && (
-                    <div className="flex-between">
-                      <strong>Подкатегория:</strong>
-                      <span>{courtCase.caseSubcategory}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Подкатегория:</div>
+                      <div className="detail-value">{courtCase.caseSubcategory}</div>
                     </div>
                   )}
                   {courtCase.region && (
-                    <div className="flex-between">
-                      <strong>Регион:</strong>
-                      <span>{courtCase.region}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Регион:</div>
+                      <div className="detail-value">{courtCase.region}</div>
                     </div>
                   )}
                   {courtCase.federalDistrict && (
-                    <div className="flex-between">
-                      <strong>Федеральный округ:</strong>
-                      <span>{courtCase.federalDistrict}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Федеральный округ:</div>
+                      <div className="detail-value">{courtCase.federalDistrict}</div>
                     </div>
                   )}
                   {courtCase.judgeName && (
-                    <div className="flex-between">
-                      <strong>Судья:</strong>
-                      <span>{courtCase.judgeName}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Судья:</div>
+                      <div className="detail-value">{courtCase.judgeName}</div>
                     </div>
                   )}
                   {courtCase.receivedDate && (
-                    <div className="flex-between">
-                      <strong>Дата поступления:</strong>
-                      <span>{formatDate(courtCase.receivedDate)}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Дата поступления:</div>
+                      <div className="detail-value">{formatDate(courtCase.receivedDate)}</div>
                     </div>
                   )}
                   {courtCase.startDate && (
-                    <div className="flex-between">
-                      <strong>Дата начала:</strong>
-                      <span>{formatDate(courtCase.startDate)}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Дата начала:</div>
+                      <div className="detail-value">{formatDate(courtCase.startDate)}</div>
                     </div>
                   )}
-                  {courtCase.decisionDate && (
-                    <div className="flex-between">
-                      <strong>Дата решения:</strong>
-                      <span>{formatDate(courtCase.decisionDate)}</span>
-                    </div>
-                  )}
+                
                   {courtCase.decisionType && (
-                    <div className="flex-between">
-                      <strong>Тип решения:</strong>
-                      <span>{courtCase.decisionType}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Тип решения:</div>
+                      <div className="detail-value">{courtCase.decisionType}</div>
                     </div>
                   )}
-                  <div className="flex-between">
-                    <strong>Исход дела:</strong>
-                    <span className={
-                      courtCase.outcome === 'PlaintiffWin' ? 'text-success' : 
-                      courtCase.outcome === 'DefendantWin' ? 'text-danger' : 
-                      'text-muted'
-                    }>
+                  <div className="detail-row">
+                    <div className="detail-label">Исход дела:</div>
+                    <div className={`detail-value ${getOutcomeClass(courtCase.outcome)}`}>
                       {getOutcomeText(courtCase.outcome)}
-                    </span>
+                    </div>
                   </div>
                   {courtCase.caseResult && (
-                    <div className="flex-between">
-                      <strong>Результат:</strong>
-                      <span>{courtCase.caseResult}</span>
+                    <div className="detail-row">
+                      <div className="detail-label">Результат:</div>
+                      <div className="detail-value">{courtCase.caseResult}</div>
                     </div>
                   )}
-                  <div className="flex-between">
-                    <strong>Наличие решения:</strong>
-                    <span>{courtCase.hasDecision ? '✅ Есть' : '❌ Нет'}</span>
+                  <div className="detail-row">
+                    <div className="detail-label">Наличие решения:</div>
+                    <div className="detail-value">
+                      {courtCase.hasDecision ? '✅ Есть' : '❌ Нет'}
+                    </div>
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
 
-            {/* Стороны */}
-            <section>
-              <h2 className="text-section mb-md">Стороны процесса</h2>
-              <div className="card p-md">
-                <div className="space-y-md">
-                  {courtCase.plaintiff && (
-                    <div>
-                      <strong className="text-success">Истец:</strong>
-                      <p className="text-body mt-xs">{courtCase.plaintiff}</p>
-                    </div>
-                  )}
-                  {courtCase.defendant && (
-                    <div>
-                      <strong className="text-danger">Ответчик:</strong>
-                      <p className="text-body mt-xs">{courtCase.defendant}</p>
-                    </div>
-                  )}
-                  {courtCase.thirdParties && (
-                    <div>
-                      <strong>Третьи лица:</strong>
-                      <p className="text-body mt-xs">{courtCase.thirdParties}</p>
-                    </div>
-                  )}
-                  {courtCase.representatives && (
-                    <div>
-                      <strong>Представители:</strong>
-                      <p className="text-body mt-xs">{courtCase.representatives}</p>
-                    </div>
-                  )}
+            {/* Ключевые стороны (компактная версия) */}
+            {(courtCase.plaintiff || courtCase.defendant) && (
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Ключевые стороны</h2>
+                </div>
+                <div className="section-body">
+                  <div className="compact-parties">
+                    {courtCase.plaintiff && (
+                      <div className="compact-party">
+                        <div className="compact-party-title plaintiff">Истец</div>
+                        <div className="compact-party-content">
+                          {courtCase.plaintiff.split(';').map((name, index) => (
+                            <div key={index} className="compact-name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {courtCase.defendant && (
+                      <div className="compact-party">
+                        <div className="compact-party-title defendant">Ответчик</div>
+                        <div className="compact-party-content">
+                          {courtCase.defendant.split(';').map((name, index) => (
+                            <div key={index} className="compact-name-item">
+                              {name.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </section>
+            )}
 
             {/* Статьи */}
             {courtCase.articles && courtCase.articles.length > 0 && (
-              <section>
-                <h2 className="text-section mb-md">Примененные статьи</h2>
-                <div className="space-y-sm">
-                  {courtCase.articles.map((article, index) => (
-                    <div key={index} className="card p-sm">
-                      <div className="flex-between mb-xs">
-                        <strong>Статья {article.articleNumber}</strong>
-                        {article.outcome && article.outcome !== 'Unknown' && (
-                          <span className={`badge ${
-                            article.outcome === 'Applied' ? 'badge-success' : 
-                            article.outcome === 'NotApplied' ? 'badge-error' : 
-                            'badge-warning'
-                          }`}>
-                            {getArticleOutcomeText(article.outcome)}
-                          </span>
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Примененные статьи</h2>
+                </div>
+                <div className="section-body">
+                  <div className="articles-list">
+                    {courtCase.articles.map((article, index) => (
+                      <div key={index} className="article-item">
+                        <div className="article-header">
+                          <div className="article-number">
+                            Статья {article.articleNumber}
+                          </div>
+                          {article.outcome && article.outcome !== 'Unknown' && (
+                            <span className={`article-outcome ${getArticleOutcomeClass(article.outcome)}`}>
+                              {getArticleOutcomeText(article.outcome)}
+                            </span>
+                          )}
+                        </div>
+                        {article.description && (
+                          <div className="article-desc">{article.description}</div>
+                        )}
+                        {(article.part || article.point) && (
+                          <div className="article-meta">
+                            {[article.part, article.point].filter(Boolean).join(', ')}
+                          </div>
                         )}
                       </div>
-                      {article.description && (
-                        <p className="text-small text-muted">{article.description}</p>
-                      )}
-                      {(article.part || article.point) && (
-                        <p className="text-small">
-                          {[article.part, article.point].filter(Boolean).join(', ')}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </section>
+              </div>
             )}
 
             {/* Ссылки */}
-            <section>
-              <h2 className="text-section mb-md">Ссылки</h2>
-              <div className="flex flex-col gap-sm">
-                {courtCase.link && (
-                  <a href={courtCase.link} target="_blank" rel="noopener noreferrer" className="button button-outline">
-                    🔗 Карточка дела
-                  </a>
-                )}
-                {courtCase.originalCaseLink && (
-                  <a href={courtCase.originalCaseLink} target="_blank" rel="noopener noreferrer" className="button button-outline">
-                    📋 Оригинальное дело
-                  </a>
-                )}
-                {courtCase.decisionLink && (
-                  <a href={courtCase.decisionLink} target="_blank" rel="noopener noreferrer" className="button button-outline text-success">
-                    📄 Текст решения
-                  </a>
-                )}
+            {(courtCase.link || courtCase.originalCaseLink || courtCase.decisionLink) && (
+              <div className="case-section">
+                <div className="section-header">
+                  <h2 className="section-title">Ссылки</h2>
+                </div>
+                <div className="section-body">
+                  <div className="links-grid">
+                    {courtCase.link && (
+                      <a 
+                        href={courtCase.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="case-link"
+                      >
+                        <span className="link-text">
+                          <span className="link-icon">🔗</span>
+                          Карточка дела
+                        </span>
+                        <span className="link-arrow">→</span>
+                      </a>
+                    )}
+                    {courtCase.originalCaseLink && (
+                      <a 
+                        href={courtCase.originalCaseLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="case-link"
+                      >
+                        <span className="link-text">
+                          <span className="link-icon">📋</span>
+                          Оригинальное дело
+                        </span>
+                        <span className="link-arrow">→</span>
+                      </a>
+                    )}
+                    {courtCase.decisionLink && courtCase.hasDecision && (
+                      <a 
+                        href={courtCase.decisionLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="case-link"
+                      >
+                        <span className="link-text">
+                          <span className="link-icon">📄</span>
+                          Текст решения
+                        </span>
+                        <span className="link-arrow">→</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
-            </section>
+            )}
           </div>
         </div>
-
-        {/* Движения дела */}
-        {courtCase.movements && courtCase.movements.length > 0 && (
-          <section className="mt-xl">
-            <h2 className="text-section mb-md">Хронология дела</h2>
-            <div className="card">
-              {courtCase.movements.map((movement, index) => (
-                <div key={index} className={`p-md ${index % 2 === 0 ? 'bg-light' : ''}`}>
-                  <div className="flex-between mb-sm">
-                    <strong>{movement.eventName}</strong>
-                    <span className="text-small text-muted">
-                      {formatDate(movement.eventDate)}
-                    </span>
-                  </div>
-                  {movement.eventResult && (
-                    <p className="text-body mb-xs"><strong>Результат:</strong> {movement.eventResult}</p>
-                  )}
-                  {movement.basis && (
-                    <p className="text-small text-muted"><strong>Основание:</strong> {movement.basis}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
       </motion.div>
     </div>
   );

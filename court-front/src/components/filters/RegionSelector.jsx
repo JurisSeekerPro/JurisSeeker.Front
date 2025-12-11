@@ -133,7 +133,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
       {/* Заголовок и управление */}
       <div className="region-header">
         <div className="region-title">
-          <span className="region-icon">🗺️</span>
           Выбор регионов
           <span className="region-counter">
             ({selectedCount}/{totalRegions})
@@ -145,14 +144,14 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
             onClick={selectAllRegions}
             title="Выбрать все регионы"
           >
-            ✅ Все
+            Все
           </button>
           <button 
             className="region-action-btn"
             onClick={clearAll}
             title="Очистить выбор"
           >
-            🗑️ Очистить
+            Очистить
           </button>
         </div>
       </div>
@@ -161,7 +160,7 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
       <div className="region-search">
         <input
           type="text"
-          placeholder="🔍 Поиск региона..."
+          placeholder="Поиск региона..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="region-search-input"
@@ -243,7 +242,7 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
 
       {/* Быстрый выбор популярных регионов */}
       <div className="popular-regions">
-        <div className="popular-title">🚀 Популярные регионы:</div>
+        <div className="popular-title">Популярные регионы:</div>
         <div className="popular-chips">
           {["Москва", "Московская область", "Санкт-Петербург", "Ленинградская область", 
             "Краснодарский край", "Свердловская область", "Новосибирская область", 

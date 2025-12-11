@@ -1,83 +1,144 @@
 // src/components/CaseCard.jsx
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import '../styles/case-card.css';
 
 export default function CaseCard({ courtCase }) {
   const navigate = useNavigate();
 
+  // Простой заголовок: Тип суда
+  const getCaseTitle = () => {
+    return courtCase.courtType || 'Судебное дело';
+  };
+
+  // Форматируем дату
   const formatDate = (dateString) => {
-    if (!dateString) return 'Не указана';
-    return new Date(dateString).toLocaleDateString('ru-RU');
+    if (!dateString) return '—';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
   };
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  // Проверяем, есть ли решение
+  const hasDecision = courtCase.hasDecision === true || courtCase.hasDecision === "true";
+
+  // Обработчик клика по всей карточке
+  const handleCardClick = (e) => {
+    // Предотвращаем клик если нажали на кнопку "Подробнее"
+    if (e.target.closest('.case-details-btn')) {
+      return;
+    }
+    
+    const caseId = courtCase.id;
+    if (caseId) {
+      navigate(`/case/${caseId}`);
+    }
   };
 
-  // Обработчик клика по карточке
-  const handleCardClick = () => {
-    // Используем courtCaseId из Elasticsearch если есть, иначе обычный id
-    const caseId = courtCase.courtCaseId || courtCase.id;
-    navigate(`/case/${caseId}`);
+  // Обработчик клика по кнопке "Подробнее"
+  const handleDetailsClick = () => {
+    const caseId = courtCase.id;
+    if (caseId) {
+      navigate(`/case/${caseId}`);
+    }
   };
 
   return (
-    <motion.div 
+    <div 
+      className="case-card"
       onClick={handleCardClick}
-      style={{
-        border: '1px solid #e1e5e9',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '16px',
-        backgroundColor: 'white',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        cursor: 'pointer'
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick(e);
+        }
       }}
-      whileHover={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
     >
-      <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>
-        {truncateText(courtCase.title, 100)}
-      </h3>
+      <div className="case-header">
+        <h3 className="case-title">{getCaseTitle()}</h3>
+        <div className="case-number-container">
+          <span className="case-number-label">ДЕЛО №</span>
+          <span className="case-number-value">
+            {courtCase.caseNumber || '—'}
+          </span>
+        </div>
+      </div>
       
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-        <span style={{
-          backgroundColor: '#f0f7ff',
-          color: '#0066cc',
-          padding: '4px 8px',
-          borderRadius: '6px',
-          fontSize: '14px'
-        }}>
-          {courtCase.caseNumber}
-        </span>
-        <span style={{
-          backgroundColor: '#f8f9fa',
-          color: '#495057',
-          padding: '4px 8px',
-          borderRadius: '6px',
-          fontSize: '14px'
-        }}>
-          {courtCase.courtType}
-        </span>
+      <div className="case-details">
+        {/* Истец */}
+        {courtCase.plaintiff && (
+          <div className="detail-row">
+            <span className="detail-label">Истец:</span>
+            <span className="detail-value">{courtCase.plaintiff}</span>
+          </div>
+        )}
+        
+        {/* Ответчик */}
+        {courtCase.defendant && (
+          <div className="detail-row">
+            <span className="detail-label">Ответчик:</span>
+            <span className="detail-value">{courtCase.defendant}</span>
+          </div>
+        )}
+        
+        {/* Регион */}
+        {courtCase.region && (
+          <div className="detail-row">
+            <span className="detail-label">Регион:</span>
+            <span className="detail-value">{courtCase.region}</span>
+          </div>
+        )}
+        
+        {/* Судья */}
+        {courtCase.judgeName && courtCase.judgeName.trim() !== "" && (
+          <div className="detail-row">
+            <span className="detail-label">Судья:</span>
+            <span className="detail-value">{courtCase.judgeName}</span>
+          </div>
+        )}
+        
+        {/* Дата поступления */}
+        {courtCase.receivedDate && (
+          <div className="detail-row">
+            <span className="detail-label">Дата поступления:</span>
+            <span className="detail-value">{formatDate(courtCase.receivedDate)}</span>
+          </div>
+        )}
       </div>
-
-      <p style={{ color: '#666', marginBottom: '12px', fontSize: '14px' }}>
-        {truncateText(courtCase.description, 120)}
-      </p>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '14px' }}>
-        <div><strong>Истец:</strong> {truncateText(courtCase.plaintiff, 30)}</div>
-        <div><strong>Ответчик:</strong> {truncateText(courtCase.defendant, 30)}</div>
-        <div><strong>Регион:</strong> {courtCase.region}</div>
-        <div><strong>Дата:</strong> {formatDate(courtCase.receivedDate)}</div>
+      
+      <div className="case-footer">
+        <div className="case-decision">
+          {hasDecision ? (
+            <span className="decision-badge decision-yes" title="Дело имеет решение">
+              ✅ Решение вынесено
+            </span>
+          ) : (
+            <span className="decision-badge decision-no" title="Дело рассматривается">
+              ⏳ На рассмотрении
+            </span>
+          )}
+        </div>
+        
+        <button 
+          className="case-details-btn"
+          onClick={handleDetailsClick}
+          aria-label={`Подробнее о деле ${courtCase.caseNumber || ''}`}
+        >
+          Подробнее
+        </button>
       </div>
-
-      <div style={{ marginTop: '12px', textAlign: 'right' }}>
-        <span style={{ color: '#0066cc', fontSize: '14px' }}>
-          📖 Подробнее
-        </span>
-      </div>
-    </motion.div>
+    </div>
   );
 }

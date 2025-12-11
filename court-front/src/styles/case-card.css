@@ -1,0 +1,225 @@
+/* src/styles/case-card.css */
+
+/* Основной контейнер карточки дела */
+.case-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  position: relative;
+}
+
+.case-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
+  border-color: #d1d5db;
+  background-color: #fafafa;
+}
+
+.case-card:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.case-card:active {
+  transform: translateY(0);
+}
+
+/* Шапка карточки */
+.case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.case-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+  margin-right: 16px;
+}
+
+/* Контейнер для номера дела справа */
+.case-number-container {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.case-number-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.case-number-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  background: #f8fafc;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+/* Детали дела */
+.case-details {
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #4b5563;
+  width: 140px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #111827;
+  flex: 1;
+}
+
+/* Футер карточки */
+.case-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.case-decision {
+  display: flex;
+  align-items: center;
+}
+
+.decision-badge {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.decision-yes {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.decision-no {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.case-details-btn {
+  background: #f8fafc;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.case-details-btn:hover {
+  background: #f1f5f9;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.case-details-btn:active {
+  transform: translateY(0);
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+  .case-card {
+    padding: 16px;
+  }
+  
+  .case-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .case-title {
+    margin-right: 0;
+    font-size: 16px;
+  }
+  
+  .case-number-container {
+    align-self: stretch;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .case-number-value {
+    align-self: flex-start;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .detail-label {
+    width: 100%;
+  }
+  
+  .case-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .case-details-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Легкий акцент при наведении на детали */
+.detail-value {
+  transition: color 0.2s ease;
+}
+
+.case-card:hover .detail-value {
+  color: #1f2937;
+}
+
