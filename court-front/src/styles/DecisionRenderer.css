@@ -1,0 +1,144 @@
+/* src/components/DecisionRenderer.css */
+.decision-renderer {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+.decision-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 13px;
+  color: #666;
+}
+
+.decision-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  position: relative;
+}
+
+.decision-content.expanded {
+  max-height: none !important;
+}
+
+/* Заголовки */
+.decision-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 32px 0 24px;
+  color: #1a237e;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e8eaf6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.decision-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 24px 0 16px;
+  color: #283593;
+  padding-left: 16px;
+  border-left: 3px solid #7986cb;
+}
+
+/* Абзацы */
+.decision-paragraph {
+  margin: 16px 0;
+  text-indent: 1.5em;
+  text-align: justify;
+  hyphens: auto;
+  word-wrap: break-word;
+}
+
+/* Убираем отступ для первого абзаца после заголовка */
+.decision-title + .decision-paragraph,
+.decision-subtitle + .decision-paragraph {
+  text-indent: 0;
+  margin-top: 8px;
+}
+
+/* Списки */
+.decision-list {
+  margin: 16px 0;
+  padding-left: 32px;
+}
+
+.decision-list-item {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+/* Защищенные данные */
+.decision-paragraph strong {
+  font-weight: 600;
+}
+
+.decision-paragraph em {
+  font-style: italic;
+}
+
+/* Особые стили для защищенных данных */
+.decision-paragraph [data-protected] {
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+  font-family: 'Courier New', monospace;
+  color: #d32f2f;
+}
+
+/* Кнопка развернуть */
+.expand-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  background: linear-gradient(to bottom, transparent, white 20%);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  color: #1976d2;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.expand-button:hover {
+  background: #f5f9ff;
+  border-color: #1976d2;
+}
+
+/* Затемнение для длинного текста */
+.decision-content:not(.expanded)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .decision-title {
+    font-size: 20px;
+    margin: 24px 0 16px;
+  }
+  
+  .decision-subtitle {
+    font-size: 16px;
+    margin: 20px 0 12px;
+  }
+  
+  .decision-paragraph {
+    text-indent: 1em;
+  }
+}

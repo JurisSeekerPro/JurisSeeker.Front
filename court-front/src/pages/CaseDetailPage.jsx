@@ -5,6 +5,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { motion } from 'framer-motion';
 import './../styles/case-detail.css';
+import DecisionText from '../components/DecisionText';
 
 // GraphQL запрос
 const GET_COURT_CASE_BY_COURT_CASE_ID = gql`
@@ -18,9 +19,7 @@ const GET_COURT_CASE_BY_COURT_CASE_ID = gql`
       decisionType
       decisionContent
       link
-      description
       originalCaseLink
-      subject
       hasDecision
       decisionLink
       federalDistrict
@@ -156,7 +155,7 @@ export default function CaseDetailPage() {
             <button onClick={() => window.location.reload()} className="button button-primary">
               Повторить запрос
             </button>
-            <button onClick={() => navigate('/analyze')} className="button button-outline">
+            <button onClick={() => navigate('/')} className="button button-outline">
               Назад к поиску
             </button>
           </div>
@@ -172,7 +171,7 @@ export default function CaseDetailPage() {
         <div className="error-state">
           <h3 className="error-title mb-md">Дело не найдено</h3>
           <p className="error-message">Дело с CourtCaseId {id} не существует в системе</p>
-          <button onClick={() => navigate('/analyze')} className="button button-primary">
+          <button onClick={() => navigate('/')} className="button button-primary">
             Назад к поиску
           </button>
         </div>
@@ -183,7 +182,7 @@ export default function CaseDetailPage() {
   return (
     <div className="case-detail-page">
       {/* Шапка */}
-    <div className="case-header">
+      <div className="case-header">
         <button 
           onClick={() => navigate('/')}
           className="back-button"
@@ -242,29 +241,6 @@ export default function CaseDetailPage() {
         <div className="case-content">
           {/* Левая колонка */}
           <div className="case-left-column">
-            {/* Описание */}
-            {courtCase.description && (
-              <div className="case-section">
-                <div className="section-header">
-                  <h2 className="section-title">Описание дела</h2>
-                </div>
-                <div className="section-body">
-                  <p className="text-multiline">{courtCase.description}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Суть спора */}
-            {courtCase.subject && (
-              <div className="case-section">
-                <div className="section-header">
-                  <h2 className="section-title">Суть спора</h2>
-                </div>
-                <div className="section-body">
-                  <p className="text-multiline">{courtCase.subject}</p>
-                </div>
-              </div>
-            )}
 
             {/* Стороны процесса (красивая карточка) */}
             {(courtCase.plaintiff || courtCase.defendant || courtCase.thirdParties || courtCase.representatives) && (
@@ -374,19 +350,19 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-
-             {/* Текст решения */}
-            {courtCase.decisionContent && (
+             {/* Текст решения - показываем только если есть решение */}
+            {courtCase.hasDecision && courtCase.decisionContent && (
               <div className="case-section">
                 <div className="section-header">
-                  <h2 className="section-title">Текст решения</h2>
+                  <h2 className="section-title">
+                    Текст решения
+                    {courtCase.decisionType && (
+                      <span className="decision-type-badge">{courtCase.decisionType}</span>
+                    )}
+                  </h2>
                 </div>
                 <div className="section-body">
-                  <div className="decision-content-wrapper">
-                    <div className="decision-text">
-                      {courtCase.decisionContent}
-                    </div>
-                  </div>
+                  <DecisionText content={courtCase.decisionContent} />
                 </div>
               </div>
             )}
@@ -443,29 +419,44 @@ export default function CaseDetailPage() {
                       <div className="detail-value">{formatDate(courtCase.startDate)}</div>
                     </div>
                   )}
-                
-                  {courtCase.decisionType && (
-                    <div className="detail-row">
-                      <div className="detail-label">Тип решения:</div>
-                      <div className="detail-value">{courtCase.decisionType}</div>
-                    </div>
+                  
+                  {/* Поля, связанные с решением - показываем только если есть решение */}
+                  {courtCase.hasDecision && (
+                    <>
+                      {courtCase.decisionType && (
+                        <div className="detail-row">
+                          <div className="detail-label">Тип решения:</div>
+                          <div className="detail-value">{courtCase.decisionType}</div>
+                        </div>
+                      )}
+                      <div className="detail-row">
+                        <div className="detail-label">Исход дела:</div>
+                        <div className={`detail-value ${getOutcomeClass(courtCase.outcome)}`}>
+                          {getOutcomeText(courtCase.outcome)}
+                        </div>
+                      </div>
+                      {courtCase.caseResult && (
+                        <div className="detail-row">
+                          <div className="detail-label">Результат:</div>
+                          <div className="detail-value">{courtCase.caseResult}</div>
+                        </div>
+                      )}
+                    </>
                   )}
-                  <div className="detail-row">
-                    <div className="detail-label">Исход дела:</div>
-                    <div className={`detail-value ${getOutcomeClass(courtCase.outcome)}`}>
-                      {getOutcomeText(courtCase.outcome)}
-                    </div>
-                  </div>
-                  {courtCase.caseResult && (
-                    <div className="detail-row">
-                      <div className="detail-label">Результат:</div>
-                      <div className="detail-value">{courtCase.caseResult}</div>
-                    </div>
-                  )}
+                  
+                  {/* Статус решения всегда показываем */}
                   <div className="detail-row">
                     <div className="detail-label">Наличие решения:</div>
                     <div className="detail-value">
-                      {courtCase.hasDecision ? '✅ Есть' : '❌ Нет'}
+                      {courtCase.hasDecision ? (
+                        <span style={{ color: '#28a745', fontWeight: '500' }}>
+                          ✅ Есть решение
+                        </span>
+                      ) : (
+                        <span style={{ color: '#6c757d', fontWeight: '500' }}>
+                          ❌ Решение отсутствует
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -509,11 +500,13 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {/* Статьи */}
+            {/* Статьи - показываем всегда, если есть */}
             {courtCase.articles && courtCase.articles.length > 0 && (
               <div className="case-section">
                 <div className="section-header">
-                  <h2 className="section-title">Примененные статьи</h2>
+                  <h2 className="section-title">
+                    {courtCase.hasDecision ? 'Примененные статьи' : 'Упомянутые статьи'}
+                  </h2>
                 </div>
                 <div className="section-body">
                   <div className="articles-list">
@@ -523,7 +516,8 @@ export default function CaseDetailPage() {
                           <div className="article-number">
                             Статья {article.articleNumber}
                           </div>
-                          {article.outcome && article.outcome !== 'Unknown' && (
+                          {/* Показываем исход статьи только если есть решение */}
+                          {courtCase.hasDecision && article.outcome && article.outcome !== 'Unknown' && (
                             <span className={`article-outcome ${getArticleOutcomeClass(article.outcome)}`}>
                               {getArticleOutcomeText(article.outcome)}
                             </span>
@@ -545,7 +539,7 @@ export default function CaseDetailPage() {
             )}
 
             {/* Ссылки */}
-            {(courtCase.link || courtCase.originalCaseLink || courtCase.decisionLink) && (
+            {(courtCase.link || courtCase.originalCaseLink || (courtCase.hasDecision && courtCase.decisionLink)) && (
               <div className="case-section">
                 <div className="section-header">
                   <h2 className="section-title">Ссылки</h2>
@@ -580,7 +574,8 @@ export default function CaseDetailPage() {
                         <span className="link-arrow">→</span>
                       </a>
                     )}
-                    {courtCase.decisionLink && courtCase.hasDecision && (
+                    {/* Ссылку на решение показываем только если есть решение */}
+                    {courtCase.hasDecision && courtCase.decisionLink && (
                       <a 
                         href={courtCase.decisionLink} 
                         target="_blank" 
