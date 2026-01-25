@@ -1,5 +1,6 @@
 // src/pages/home/HomePage.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import CaseCard from "../../components/CaseCard";
@@ -7,7 +8,96 @@ import Pagination from "../../components/Pagination";
 import SearchFilters from "../../components/filters/SearchFilters";
 import "../../styles/components.css";
 
-// Базовый запрос с минимальными полями
+// Базовые фильтры
+const DEFAULT_FILTERS = {
+  searchText: "",
+  caseNumber: "",
+  plaintiff: "",
+  defendant: "",
+  regions: [],
+  judgeName: "",
+  dateFrom: "",
+  dateTo: "",
+  hasDecision: null,
+};
+
+// Правильная сериализация с кодированием
+const serializeFilters = (filters) => {
+  const params = new URLSearchParams();
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value) && value.length > 0) {
+      // Просто сохраняем как строку через запятую
+      params.set(key, value.join(','));
+    } else if (value !== null && value !== undefined && value !== '' && value !== false) {
+      if (typeof value === 'boolean') {
+        params.set(key, value ? 'true' : 'false');
+      } else {
+        // НЕ кодируем - React Router сделает это сам
+        params.set(key, String(value));
+      }
+    }
+  });
+  
+  return params;
+};
+
+// Правильная десериализация с декодированием
+const deserializeFilters = (searchParams) => {
+  const filters = { ...DEFAULT_FILTERS };
+  
+  for (const [key, value] of searchParams.entries()) {
+    if (key in DEFAULT_FILTERS) {
+      if (Array.isArray(DEFAULT_FILTERS[key])) {
+        filters[key] = value ? value.split(',') : [];
+      } else if (typeof DEFAULT_FILTERS[key] === 'boolean' || key === 'hasDecision') {
+        filters[key] = value === 'true' ? true : (value === 'false' ? false : null);
+      } else {
+        filters[key] = value;
+      }
+    }
+  }
+  
+  return filters;
+};
+
+// Функция для плавного скролла к элементу
+const smoothScrollToElement = (element, duration = 600) => {
+  if (!element) return;
+  
+  const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+  const startPosition = window.pageYOffset;
+  const distance = elementPosition - startPosition;
+  
+  // Если расстояние маленькое - скроллим сразу
+  if (Math.abs(distance) < 50) {
+    window.scrollTo(0, elementPosition);
+    return;
+  }
+  
+  let startTime = null;
+  
+  const animation = (currentTime) => {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+    const run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
+    window.scrollTo(0, run);
+    if (timeElapsed < duration) {
+      requestAnimationFrame(animation);
+    }
+  };
+  
+  // Функция easing для плавности
+  const easeInOutQuad = (t, b, c, d) => {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
+  };
+  
+  requestAnimationFrame(animation);
+};
+
 const GET_COURT_CASES_SIMPLE = gql`
   query GetCourtCasesSimple(
     $first: Int
@@ -43,23 +133,94 @@ const GET_COURT_CASES_SIMPLE = gql`
 const flattenEdges = (edges) => (edges ? edges.map((e) => e.node) : []);
 
 export default function HomePage() {
-  const [filters, setFilters] = useState({
-    searchText: "",
-    caseNumber: "",
-    plaintiff: "",
-    defendant: "",
-    regions: [],
-    judgeName: "",
-    dateFrom: "",
-    dateTo: "",
-    hasDecision: null,
-  });
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Ref для контейнера с результатами поиска
+  const resultsContainerRef = useRef(null);
+  const prevPageRef = useRef(1);
+  
+  // Загружаем фильтры из URL при инициализации
+  const [filters, setFilters] = useState(() => deserializeFilters(searchParams));
   const [activeFilters, setActiveFilters] = useState({});
   const [page, setPage] = useState(1);
   const [cursors, setCursors] = useState([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const casesPerPage = 10;
+
+  // Обновляем URL при изменении фильтров
+  useEffect(() => {
+    const newParams = serializeFilters(filters);
+    
+    // Добавляем страницу
+    if (page > 1) {
+      newParams.set('page', page.toString());
+    }
+    
+    // Обновляем URL - React Router сам позаботится о кодировании
+    setSearchParams(newParams, { replace: true });
+  }, [filters, page, setSearchParams]);
+
+  // Восстанавливаем состояние из URL при загрузке страницы
+  useEffect(() => {
+    const paramsFilters = deserializeFilters(searchParams);
+    setFilters(paramsFilters);
+    
+    // Проверяем, есть ли активные фильтры
+    const hasActiveFilters = Object.keys(paramsFilters).some(key => {
+      const value = paramsFilters[key];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'string') return value.trim() !== '';
+      return value !== null && value !== undefined && value !== '' && value !== false;
+    });
+    
+    // Восстанавливаем страницу
+    const savedPage = searchParams.get('page');
+    if (savedPage) {
+      const pageNum = parseInt(savedPage, 10);
+      if (!isNaN(pageNum) && pageNum > 0) {
+        setPage(pageNum);
+      }
+    }
+    
+    // Если есть фильтры - выполняем поиск
+    if (hasActiveFilters) {
+      // Формируем safeFilters для поиска
+      const safeFilters = {};
+      
+      if (paramsFilters.caseNumber?.trim()) {
+        safeFilters.caseNumber = paramsFilters.caseNumber.trim();
+      }
+      
+      if (paramsFilters.plaintiff?.trim()) {
+        safeFilters.plaintiff = paramsFilters.plaintiff.trim();
+      }
+      
+      if (paramsFilters.defendant?.trim()) {
+        safeFilters.defendant = paramsFilters.defendant.trim();
+      }
+      
+      if (paramsFilters.judgeName?.trim()) {
+        safeFilters.judgeName = paramsFilters.judgeName.trim();
+      }
+      
+      if (paramsFilters.regions?.length > 0) {
+        safeFilters.regions = paramsFilters.regions;
+      }
+      
+      if (paramsFilters.hasDecision !== null && paramsFilters.hasDecision !== undefined) {
+        safeFilters.hasDecision = paramsFilters.hasDecision;
+      }
+      
+      if (paramsFilters.dateFrom && paramsFilters.dateTo) {
+        safeFilters.dateFrom = paramsFilters.dateFrom;
+        safeFilters.dateTo = paramsFilters.dateTo;
+      }
+      
+      console.log("Восстановленные фильтры из URL:", safeFilters);
+      setActiveFilters(safeFilters);
+      setSearchPerformed(true);
+    }
+  }, []); // Только при монтировании
 
   // Динамически формируем запрос
   const { query, variables } = useMemo(() => {
@@ -77,6 +238,7 @@ export default function HomePage() {
 
     // Добавляем фильтры по одному для надежности
     if (activeFilters.regions?.length > 0) {
+      // Для GraphQL передаем первый регион (если нужно несколько, нужен оператор `in`)
       filterConditions.push(`region: { eq: $region }`);
       filterVars.region = activeFilters.regions[0];
     }
@@ -167,11 +329,6 @@ export default function HomePage() {
       dynamicQuery = GET_COURT_CASES_SIMPLE;
     }
 
-    console.log("=== GRAPHQL ЗАПРОС ===");
-    console.log("Переменные:", JSON.stringify(filterVars, null, 2));
-    console.log("Активные фильтры:", activeFilters);
-    console.log("====================");
-
     return { 
       query: dynamicQuery, 
       variables: filterVars 
@@ -197,6 +354,35 @@ export default function HomePage() {
       setCursors([]);
     }
   }, [activeFilters]);
+
+  // Эффект для скролла после загрузки данных
+  useEffect(() => {
+    // Сравниваем текущую страницу с предыдущей
+    if (prevPageRef.current !== page && !loading && data) {
+      // Ждем немного для гарантии рендера DOM
+      setTimeout(() => {
+        // Вариант 1: Используем ref для скролла к контейнеру с результатами
+        if (resultsContainerRef.current) {
+          smoothScrollToElement(resultsContainerRef.current, 1400);
+        } else {
+          // Вариант 2: Ищем список дел
+          const caseList = document.querySelector('.case-list');
+          if (caseList) {
+            smoothScrollToElement(caseList, 1400);
+          } else {
+            // Вариант 3: Fallback
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 50); // Минимальная задержка для рендера DOM
+      
+      // Обновляем предыдущую страницу
+      prevPageRef.current = page;
+    }
+  }, [loading, data, page]);
 
   const handlePageChange = (newPage) => {
     if (newPage > page && data?.courtCases?.pageInfo?.endCursor) {
@@ -252,24 +438,18 @@ export default function HomePage() {
     
     setActiveFilters(safeFilters);
     setSearchPerformed(true);
+    setFilters(searchFilters);
   };
 
   const handleClearSearch = () => {
     setActiveFilters({});
     setSearchPerformed(false);
-    setFilters({
-      searchText: "",
-      caseNumber: "",
-      plaintiff: "",
-      defendant: "",
-      regions: [],
-      judgeName: "",
-      dateFrom: "",
-      dateTo: "",
-      hasDecision: null,
-    });
+    setFilters(DEFAULT_FILTERS);
     setPage(1);
     setCursors([]);
+    
+    // Очищаем URL-параметры
+    setSearchParams({}, { replace: true });
   };
 
   const currentCases = flattenEdges(data?.courtCases?.edges);
@@ -289,7 +469,7 @@ export default function HomePage() {
 
       {/* Состояние после поиска */}
       {searchPerformed && (
-        <>
+        <div ref={resultsContainerRef}> {/* Добавляем ref для скролла */}
           {loading && (
             <div className="text-center py-8">
               <div className="spinner mx-auto"></div>
@@ -320,6 +500,11 @@ export default function HomePage() {
 
           {!loading && !error && currentCases && currentCases.length > 0 ? (
             <>
+              {/* Можно добавить заголовок с количеством результатов */}
+              <div className="results-header" style={{ minHeight: '1px' }}>
+                {/* Невидимый элемент для скролла */}
+              </div>
+              
               <div className="case-list mb-lg">
                 {currentCases.map((courtCase) => (
                   <CaseCard key={courtCase.id} courtCase={courtCase} />
@@ -351,7 +536,7 @@ export default function HomePage() {
               </div>
             )
           )}
-        </>
+        </div>
       )}
     </div>
   );
