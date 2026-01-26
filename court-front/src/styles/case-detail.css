@@ -435,19 +435,19 @@
 }
 
 .event-result {
-  color: #495057;
+  color: #000000;
   font-size: 15px;
   line-height: 1.6;
 }
 
 .event-result strong {
-  color: #495057;
+  color: #000000;
   font-weight: 600;
 }
 
 .event-basis {
   font-size: 14px;
-  color: #adb5bd;
+  color: #000000;
   line-height: 1.5;
 }
 

@@ -5,138 +5,190 @@ import './../styles/DecisionText.css';
 const DecisionText = ({ content, className = '' }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsExpansion, setNeedsExpansion] = useState(false);
+  const [processedContent, setProcessedContent] = useState('');
   const containerRef = useRef(null);
   const textRef = useRef(null);
+
+  // Функция для определения, нужен ли отступ на основе содержания
+  const shouldHaveIndent = (text) => {
+    if (!text || text.trim().length < 10) return false;
+    
+    // Определяем типы текста, которые НЕ должны иметь отступ
+    const noIndentPatterns = [
+      /^к делу №/i,
+      /^РЕШЕНИЕ$/i,
+      /^Именем Российской Федерации$/i,
+      /^УСТАНОВИЛ:$/i,
+      /^РЕШИЛ:$/i,
+      /^Дело №/i,
+      /^Судья\s+[А-ЯЁ]/i,
+      /^Председательствующий/i,
+      /^\d{1,2}\s+[а-яё]+\s+\d{4}/i, // Дата в начале строки
+      /^\d{1,2}\.\d{1,2}\.\d{4}/,   // Дата в формате ДД.ММ.ГГГГ
+      /^[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\./i, // ФИО в начале
+      /^[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\.[А-ЯЁ]\./i,    // ФИО с инициалами
+    ];
+    
+    // Проверяем, соответствует ли текст шаблонам без отступа
+    for (const pattern of noIndentPatterns) {
+      if (pattern.test(text)) return false;
+    }
+    
+    // Для остального текста - даем отступ
+    return true;
+  };
+
+  // Обработка контента при загрузке
+  useEffect(() => {
+    if (!content) return;
+
+    const processContent = (html) => {
+      // 1. Удаляем пустые title
+      html = html.replace(/<title><\/title>/g, '');
+      
+      // 2. УДАЛЯЕМ защищенные теги, оставляя только текст внутри
+      html = html
+        .replace(/<ФИО>([^<]*)<\/ФИО>/gi, '$1')
+        .replace(/<адрес>([^<]*)<\/адрес>/gi, '$1')
+        .replace(/<дата>([^<]*)<\/дата>/gi, '$1')
+        .replace(/<номер>([^<]*)<\/номер>/gi, '$1')
+        .replace(/<данные изъяты>([^<]*)<\/данные изъяты>/gi, '[скрыто]')
+        .replace(/<адрес><адрес>([^<]*)<\/адрес><\/адрес>/gi, '$1');
+      
+      // 3. Парсим HTML с помощью DOMParser для точной обработки
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // 4. Обрабатываем все элементы
+      const processNode = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return node.textContent;
+        }
+        
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const tagName = node.tagName.toLowerCase();
+          const text = node.textContent.trim();
+          
+          // Для тега p - определяем стиль
+          if (tagName === 'p') {
+            const style = node.getAttribute('style') || '';
+            const hasCenter = style.includes('TEXT-ALIGN: center') || 
+                             style.includes('text-align: center');
+            const hasJustify = style.includes('TEXT-ALIGN: justify') || 
+                              style.includes('text-align: justify');
+            const hasRight = style.includes('TEXT-ALIGN: right') || 
+                            style.includes('text-align: right');
+            const hasIndent = style.includes('TEXT-INDENT') || 
+                             style.includes('text-indent');
+            
+            // Определяем классы на основе стилей И содержания
+            let classes = 'decision-block';
+            
+            // Выравнивание
+            if (hasCenter) classes += ' text-center';
+            if (hasJustify) classes += ' text-justify';
+            if (hasRight) classes += ' text-right';
+            
+            // Отступ - учитываем и стиль, и содержание
+            const needsIndent = hasIndent || shouldHaveIndent(text);
+            if (needsIndent) classes += ' has-indent';
+            
+            // Специальные классы на основе содержания
+            if (/^к делу №/i.test(text)) {
+              classes += ' case-reference';
+            } else if (/^РЕШЕНИЕ$/i.test(text)) {
+              classes += ' main-title';
+            } else if (/^Именем Российской Федерации$/i.test(text)) {
+              classes += ' document-title';
+            } else if (/^УСТАНОВИЛ:$/i.test(text)) {
+              classes += ' section-title';
+            } else if (/^РЕШИЛ:$/i.test(text)) {
+              classes += ' section-title decision-title';
+            } else if (/^Дело №/i.test(text)) {
+              classes += ' case-number';
+            } else if (/^Судья\s+[А-ЯЁ]/i.test(text) || 
+                      /^Председательствующий/i.test(text)) {
+              classes += ' judge-signature';
+            } else if (/^\d{1,2}\s+[а-яё]+\s+\d{4}/i.test(text) || 
+                      /^\d{1,2}\.\d{1,2}\.\d{4}/.test(text)) {
+              classes += ' date-paragraph';
+            }
+            
+            // Обрабатываем дочерние элементы
+            let childContent = '';
+            Array.from(node.childNodes).forEach(child => {
+              childContent += processNode(child);
+            });
+            
+            return `<div class="${classes}">${childContent}</div>`;
+          }
+          
+          // Для других тегов
+          if (tagName === 'table') {
+            return `<table class="decision-table">${node.innerHTML}</table>`;
+          }
+          
+          if (tagName === 'center') {
+            return `<div class="text-center">${node.innerHTML}</div>`;
+          }
+          
+          if (tagName === 'span') {
+            return `<span>${node.innerHTML}</span>`;
+          }
+          
+          // Рекурсивно обрабатываем другие элементы
+          let result = `<${tagName}`;
+          
+          // Копируем атрибуты (кроме style для p-тегов)
+          Array.from(node.attributes).forEach(attr => {
+            if (tagName !== 'p' || attr.name !== 'style') {
+              result += ` ${attr.name}="${attr.value}"`;
+            }
+          });
+          
+          result += '>';
+          
+          Array.from(node.childNodes).forEach(child => {
+            result += processNode(child);
+          });
+          
+          result += `</${tagName}>`;
+          return result;
+        }
+        
+        return '';
+      };
+      
+      // Обрабатываем весь документ
+      let result = '';
+      Array.from(doc.body.childNodes).forEach(child => {
+        result += processNode(child);
+      });
+      
+      // 5. Очищаем лишние пробелы и пустые блоки
+      result = result
+        .replace(/\s+/g, ' ')
+        .replace(/>\s+</g, '><')
+        .replace(/<div class="decision-block">\s*<\/div>/g, '')
+        .trim();
+      
+      return result;
+    };
+
+    setProcessedContent(processContent(content));
+  }, [content]);
 
   // Определяем, нужна ли кнопка "Показать полностью"
   useEffect(() => {
     if (textRef.current && containerRef.current) {
       const textHeight = textRef.current.scrollHeight;
       const containerHeight = containerRef.current.clientHeight;
-      setNeedsExpansion(textHeight > 600); // Если текст больше 600px по высоте
+      setNeedsExpansion(textHeight > 600);
     }
-  }, [content]);
+  }, [processedContent]);
 
-  // Обработка строк с форматированием
-  const renderFormattedLine = (line, index) => {
-    // Очищаем лишние пробелы
-    line = line.trim();
-    if (!line) return null;
-
-    // Обнаруживаем заголовки
-    if (line.match(/^### .* ###$/)) {
-      const text = line.replace(/^### (.*) ###$/, '$1');
-      return (
-        <h3 key={index} className="decision-header">
-          {text}
-        </h3>
-      );
-    }
-
-    // Обнаруживаем подзаголовки
-    if (line.match(/^==== .* ====$/)) {
-      const text = line.replace(/^==== (.*) ====$/, '$1');
-      return (
-        <h4 key={index} className="decision-subheader">
-          {text}
-        </h4>
-      );
-    }
-
-    // Обнаруживаем элементы списка
-    if (line.startsWith('• ') || line.match(/^\d+\.\s/)) {
-      return (
-        <div key={index} className="decision-list-item">
-          {line}
-        </div>
-      );
-    }
-
-    // Обрабатываем защищенные данные и форматирование
-    let processedLine = line;
-    
-    // Защищенные данные с индикацией
-    processedLine = processedLine.replace(
-      /<ФИО>([^<]*)<\/ФИО>/g,
-      '<span class="protected fio" title="Защищенные персональные данные">[$1]</span>'
-    );
-    
-    processedLine = processedLine.replace(
-      /<адрес>([^<]*)<\/адрес>/g,
-      '<span class="protected address" title="Защищенный адрес">[$1]</span>'
-    );
-    
-    processedLine = processedLine.replace(
-      /<дата>([^<]*)<\/дата>/g,
-      '<span class="protected date" title="Защищенная дата">[$1]</span>'
-    );
-    
-    processedLine = processedLine.replace(
-      /<номер>([^<]*)<\/номер>/g,
-      '<span class="protected number" title="Защищенный номер">[$1]</span>'
-    );
-    
-    processedLine = processedLine.replace(
-      /<данные изъяты>([^<]*)<\/данные изъяты>/g,
-      '<span class="protected removed" title="Данные изъяты по требованию">[скрыто]</span>'
-    );
-
-    // Жирный текст
-    processedLine = processedLine.replace(
-      /\*\*([^*]+)\*\*/g,
-      '<strong>$1</strong>'
-    );
-
-    // Курсив
-    processedLine = processedLine.replace(
-      /_([^_]+)_/g,
-      '<em>$1</em>'
-    );
-
-    // Обычный абзац
-    return (
-      <p 
-        key={index} 
-        className="decision-paragraph"
-        dangerouslySetInnerHTML={{ __html: processedLine }}
-      />
-    );
-  };
-
-  // Разбиваем на строки, группируем абзацы
-  const renderContent = () => {
-    if (!content) return null;
-
-    // Разбиваем по двойным переносам строк (абзацы)
-    const paragraphs = content.split(/\n\s*\n/);
-    
-    return paragraphs.map((paragraph, paraIndex) => {
-      const lines = paragraph.split('\n').filter(line => line.trim());
-      
-      // Если это список (все строки начинаются с маркера)
-      const isList = lines.every(line => 
-        line.startsWith('• ') || line.match(/^\d+\.\s/)
-      );
-      
-      if (isList) {
-        return (
-          <div key={paraIndex} className="decision-list">
-            {lines.map((line, lineIndex) => (
-              <div key={lineIndex} className="decision-list-item">
-                {line.replace(/^[•\d\.\s]+/, '')}
-              </div>
-            ))}
-          </div>
-        );
-      }
-
-      // Обычный абзац с несколькими строками
-      return (
-        <div key={paraIndex} className="decision-paragraph-group">
-          {lines.map((line, lineIndex) => renderFormattedLine(line, `${paraIndex}-${lineIndex}`))}
-        </div>
-      );
-    });
+  const createMarkup = (html) => {
+    return { __html: html };
   };
 
   return (
@@ -145,9 +197,15 @@ const DecisionText = ({ content, className = '' }) => {
         ref={containerRef}
         className={`decision-container ${isExpanded ? 'expanded' : 'collapsed'}`}
       >
-        <div ref={textRef}>
-          {renderContent()}
-        </div>
+        {processedContent ? (
+          <div 
+            className="decision-content"
+            ref={textRef}
+            dangerouslySetInnerHTML={createMarkup(processedContent)}
+          />
+        ) : (
+          <div className="decision-empty">Текст решения отсутствует</div>
+        )}
       </div>
       
       {needsExpansion && !isExpanded && (

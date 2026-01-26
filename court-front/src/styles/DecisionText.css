@@ -1,250 +1,375 @@
-/* src/components/DecisionText.css */
+/* src/styles/DecisionText.css */
 .decision-text {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  line-height: 1.7;
-  color: #333;
   position: relative;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #eaeaea;
+  width: 100%;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.6; /* Увеличили межстрочный */
+  color: #2d3748; /* Более темный серый */
+  background: transparent; /* Убрали белый фон */
+  margin: 0;
 }
 
 .decision-container {
-  padding: 24px;
-  max-height: 600px;
+  position: relative;
   overflow: hidden;
   transition: max-height 0.3s ease;
+}
+
+.decision-container.collapsed {
+  max-height: 700px; /* Увеличили высоту */
 }
 
 .decision-container.expanded {
   max-height: none;
 }
 
-/* Заголовки */
-.decision-header {
-  text-align: center;
-  font-size: 22px;
+/* Основной контент - БОЛЬШЕ ПРОСТРАНСТВА */
+.decision-content {
+  font-size: 16px; /* Увеличили размер шрифта */
+  padding: 32px; /* Больше отступов */
+  line-height: 1.6; /* Больше воздуха между строками */
+  max-width: 100%;
+}
+
+/* === БАЗОВЫЕ БЛОКИ === */
+.decision-block {
+  margin: 0 0 16px 0; /* Увеличили отступ снизу */
+  line-height: 1.6; /* Больше межстрочный интервал */
+  color: #2d3748;
+  text-align: left;
+  min-height: 1.2em;
+}
+
+/* Выравнивание */
+.decision-block.text-center {
+  text-align: center !important;
+  margin: 20px 0 !important; /* Увеличили отступы */
+}
+
+.decision-block.text-justify {
+  text-align: justify !important;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+.decision-block.text-right {
+  text-align: right !important;
+}
+
+/* ОТСТУП КРАСНОЙ СТРОКИ */
+.decision-block.has-indent {
+  text-indent: 28px !important; /* Увеличили отступ */
+  margin-bottom: 16px !important; /* Увеличили отступ снизу */
+}
+
+/* ИСКЛЮЧЕНИЯ - блоки БЕЗ отступа красной строки */
+.decision-block.case-reference,
+.decision-block.case-number,
+.decision-block.main-title,
+.decision-block.document-title,
+.decision-block.section-title,
+.decision-block.judge-signature,
+.decision-block.date-paragraph,
+.decision-block.text-center,
+.decision-block.text-right {
+  text-indent: 0 !important;
+}
+
+/* === СПЕЦИАЛЬНЫЕ ТИПЫ БЛОКОВ === */
+
+/* Ссылка на дело (в правом углу) */
+.decision-block.case-reference {
+  text-align: right;
+  font-size: 14px;
+  color: #718096; /* Серый цвет */
+  font-style: italic;
+  margin-bottom: 24px; /* Больше отступ */
+  padding-bottom: 12px; /* Больше отступ */
+}
+
+/* Номер дела */
+.decision-block.case-number {
+  font-size: 14px;
+  color: #718096; /* Серый цвет */
+  margin-bottom: 12px; /* Больше отступ */
+  text-indent: 0 !important;
+}
+
+/* ГЛАВНЫЙ ЗАГОЛОВОК "РЕШЕНИЕ" - БОЛЬШЕ И ВЫРАЗИТЕЛЬНЕЕ */
+.decision-block.main-title {
+  font-family: 'Arial', sans-serif;
   font-weight: 700;
-  margin: 30px 0 20px;
-  padding: 10px 0;
-  border-bottom: 2px solid #e0e0e0;
-  color: #1a237e;
+  font-size: 22px; /* Увеличили размер */
   text-transform: uppercase;
+  letter-spacing: 1.5px; /* Больше расстояния между буквами */
+  text-align: center;
+  color: #1a202c; /* Очень темный серый */
+  margin: 32px 0 24px 0 !important; /* Увеличили отступы */
+  padding: 12px 0; /* Больше отступы сверху/снизу */
+  border-top: 3px solid #1a202c; /* Более толстая линия */
+  border-bottom: 3px solid #1a202c; /* Более толстая линия */
+  line-height: 1.3;
+  text-indent: 0 !important;
 }
 
-.decision-subheader {
-  font-size: 18px;
+/* "Именем Российской Федерации" */
+.decision-block.document-title {
+  font-family: 'Arial', sans-serif;
   font-weight: 600;
-  margin: 25px 0 15px;
-  padding-left: 15px;
-  border-left: 3px solid #3f51b5;
-  color: #303f9f;
+  font-size: 18px; /* Увеличили размер */
+  text-align: center;
+  color: #1a202c;
+  margin: 28px 0 !important; /* Увеличили отступы */
+  line-height: 1.3;
+  text-indent: 0 !important;
 }
 
-/* Абзацы */
-.decision-paragraph-group {
-  margin-bottom: 20px;
+/* "УСТАНОВИЛ:" и "РЕШИЛ:" - ПРОСТО ТЕКСТ, БЕЗ ФОНА */
+.decision-block.section-title {
+  font-family: 'Arial', sans-serif;
+  font-weight: 700;
+  font-size: 18px; /* Увеличили размер */
+  text-align: center;
+  color: #1a202c;
+  margin: 32px 0 20px 0 !important; /* Увеличили отступы */
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-indent: 0 !important;
+  /* Убрали весь фон и границы */
+  background: none !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 
-.decision-paragraph {
-  margin: 10px 0;
+/* Особый стиль для "РЕШИЛ:" - тоже без фона */
+.decision-block.section-title.decision-title {
+  /* Убрали все специальные стили */
+  background: none !important;
+  border: none !important;
+  margin-top: 36px !important; /* Больше отступ сверху */
+  margin-bottom: 24px !important; /* Больше отступ снизу */
+}
+
+/* Параграфы с датой в начале */
+.decision-block.date-paragraph {
+  margin-bottom: 18px !important; /* Увеличили отступ */
+  color: #4a5568; /* Серый цвет */
+  text-indent: 0 !important;
+}
+
+/* Подпись судьи - БОЛЬШЕ ОТСТУПЫ */
+.decision-block.judge-signature {
+  text-align: right;
+  margin-top: 48px !important; /* Увеличили отступ сверху */
+  margin-bottom: 0 !important;
+  padding-top: 24px; /* Увеличили отступ сверху */
+  border-top: 2px dashed #cbd5e0; /* Более темная пунктирная линия */
+  font-weight: 600; /* Полужирный */
+  color: #4a5568; /* Серый цвет */
+  text-indent: 0 !important;
+  font-size: 15px; /* Немного больше */
+}
+
+/* ПРАВИЛА ДЛЯ ОСНОВНОГО ТЕКСТА */
+/* Все блоки, которые не являются специальными и имеют отступ */
+.decision-block.has-indent:not(.text-center):not(.text-right):not(.case-reference):not(.case-number):not(.main-title):not(.document-title):not(.section-title):not(.judge-signature):not(.date-paragraph) {
   text-align: justify;
-  text-indent: 1.5em;
-  line-height: 1.8;
+  text-indent: 28px !important; /* Увеличили отступ красной строки */
+  margin-bottom: 16px !important; /* Увеличили отступ снизу */
 }
 
-/* Первый абзац после заголовка без отступа */
-.decision-header + .decision-paragraph-group .decision-paragraph:first-child,
-.decision-subheader + .decision-paragraph-group .decision-paragraph:first-child {
-  text-indent: 0;
+/* Блоки без отступа (обычно начала предложений после заголовков) */
+.decision-block:not(.has-indent):not(.text-center):not(.text-right):not(.case-reference):not(.case-number):not(.main-title):not(.document-title):not(.section-title):not(.judge-signature):not(.date-paragraph) {
+  text-align: justify;
+  text-indent: 0 !important;
+  margin-bottom: 16px !important; /* Увеличили отступ снизу */
 }
 
-/* Списки */
-.decision-list {
-  margin: 15px 0 15px 30px;
+/* === ТАБЛИЦЫ === */
+.decision-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0; /* Увеличили отступы */
+  font-size: 15px; /* Увеличили размер шрифта */
+  border: 1px solid #e2e8f0; /* Светлее граница */
+}
+
+.decision-table td,
+.decision-table th {
+  border: 1px solid #e2e8f0; /* Светлее граница */
+  padding: 10px 14px; /* Увеличили отступы внутри ячеек */
+  text-align: left;
+  line-height: 1.5; /* Больше межстрочный */
+}
+
+.decision-table th {
+  background-color: #f7fafc; /* Очень светлый серый фон */
+  font-weight: 600; /* Полужирный */
+  color: #2d3748;
+}
+
+/* === СПИСКИ === */
+.decision-content ul,
+.decision-content ol {
+  margin: 16px 0 16px 28px; /* Увеличили отступы */
   padding: 0;
 }
 
-.decision-list-item {
-  margin: 8px 0;
-  padding-left: 8px;
-  position: relative;
-  line-height: 1.6;
+.decision-content li {
+  margin-bottom: 10px; /* Увеличили отступ снизу */
+  line-height: 1.5; /* Больше межстрочный */
 }
 
-.decision-list-item:before {
-  content: "•";
-  position: absolute;
-  left: -15px;
-  color: #3f51b5;
-}
-
-/* Защищенные данные */
-.protected {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 0.9em;
-  font-weight: 500;
-  cursor: help;
-  vertical-align: baseline;
-  margin: 0 2px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.protected.fio {
-  background: #e8f5e9;
-  color: #1b5e20;
-  border-color: #a5d6a7;
-}
-
-.protected.address {
-  background: #e3f2fd;
-  color: #0d47a1;
-  border-color: #90caf9;
-}
-
-.protected.date {
-  background: #fff3e0;
-  color: #e65100;
-  border-color: #ffcc80;
-}
-
-.protected.number {
-  background: #f3e5f5;
-  color: #4a148c;
-  border-color: #ce93d8;
-}
-
-.protected.removed {
-  background: #f5f5f5;
-  color: #616161;
-  border: 1px dashed #bdbdbd;
-  font-style: italic;
-}
-
-.protected:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Форматирование текста */
-strong {
-  font-weight: 700;
-  color: #283593;
-}
-
-em {
-  font-style: italic;
-  color: #5c6bc0;
-}
-
-/* Кнопки развернуть/свернуть */
+/* === КНОПКИ РАЗВЕРТЫВАНИЯ === */
 .decision-fade {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px;
-  background: linear-gradient(to bottom, transparent, white 70%);
+  height: 100px; /* Увеличили высоту градиента */
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 1) 100%
+  );
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 20px;
+  padding-bottom: 20px; /* Увеличили отступ снизу */
 }
 
 .decision-expand-button,
 .decision-collapse-button {
-  padding: 10px 24px;
-  background: #3f51b5;
+  background: #4a6fa5;
   color: white;
   border: none;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 10px 24px; /* Увеличили отступы */
+  border-radius: 6px; /* Меньше скругление */
+  font-size: 14px; /* Увеличили размер шрифта */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(63, 81, 181, 0.3);
-  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Более мягкая тень */
+  font-family: 'Arial', sans-serif;
 }
 
 .decision-expand-button:hover,
 .decision-collapse-button:hover {
-  background: #303f9f;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.4);
+  background: #3a5a8c;
+  transform: translateY(-2px); /* Более заметный эффект при наведении */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .decision-collapse-button {
-  margin: 20px auto 0;
   display: block;
+  margin: 24px auto 0; /* Увеличили отступ сверху */
+  background: #718096; /* Серый цвет */
+  min-width: 120px;
 }
 
-/* Мобильная адаптивность */
+.decision-collapse-button:hover {
+  background: #5a6c81;
+}
+
+/* Пустой контент */
+.decision-empty {
+  padding: 48px; /* Увеличили отступы */
+  text-align: center;
+  color: #a0aec0;
+  font-style: italic;
+  font-size: 16px; /* Увеличили размер шрифта */
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
-  .decision-container {
-    padding: 16px;
-    max-height: 400px;
-  }
-  
-  .decision-header {
-    font-size: 18px;
-    margin: 20px 0 15px;
-  }
-  
-  .decision-subheader {
-    font-size: 16px;
-    margin: 18px 0 12px;
-  }
-  
-  .decision-paragraph {
+  .decision-content {
     font-size: 15px;
-    text-indent: 1em;
-    line-height: 1.6;
+    padding: 24px; /* Сохраняем достаточно отступов */
   }
   
-  .decision-list {
-    margin-left: 20px;
+  .decision-block {
+    margin-bottom: 14px; /* Увеличили отступ снизу */
+    line-height: 1.55; /* Сохраняем хороший интервал */
   }
   
-  .protected {
-    font-size: 0.85em;
-    padding: 0 4px;
-  }
-}
-
-/* Темная тема */
-@media (prefers-color-scheme: dark) {
-  .decision-text {
-    background: #1e1e1e;
-    border-color: #444;
-    color: #e0e0e0;
+  .decision-block.has-indent {
+    text-indent: 24px !important; /* Сохраняем отступ */
   }
   
-  .decision-header {
-    color: #7986cb;
-    border-bottom-color: #444;
+  .decision-block.main-title {
+    font-size: 20px; /* Немного уменьшили, но все еще крупный */
+    margin: 28px 0 20px 0 !important;
+    padding: 10px 0;
   }
   
-  .decision-subheader {
-    color: #9fa8da;
-    border-left-color: #7986cb;
+  .decision-block.document-title {
+    font-size: 17px;
+    margin: 24px 0 !important;
   }
   
-  .protected.fio {
-    background: #2e7d32;
-    color: #e8f5e9;
+  .decision-block.section-title {
+    font-size: 17px;
+    margin: 28px 0 18px 0 !important;
   }
   
-  .protected.address {
-    background: #1565c0;
-    color: #e3f2fd;
+  .decision-block.judge-signature {
+    margin-top: 36px !important;
+    padding-top: 20px;
+    font-size: 14px;
+  }
+  
+  .decision-table {
+    font-size: 14px;
+    margin: 20px 0;
+  }
+  
+  .decision-table td,
+  .decision-table th {
+    padding: 8px 12px;
   }
   
   .decision-fade {
-    background: linear-gradient(to bottom, transparent, #1e1e1e 70%);
+    height: 90px;
+    padding-bottom: 16px;
+  }
+  
+  .decision-expand-button,
+  .decision-collapse-button {
+    padding: 9px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .decision-content {
+    font-size: 14px;
+    padding: 20px; /* Сохраняем отступы */
+  }
+  
+  .decision-block.has-indent {
+    text-indent: 20px !important; /* Сохраняем отступ красной строки */
+  }
+  
+  .decision-block.main-title {
+    font-size: 18px;
+    margin: 24px 0 18px 0 !important;
+    padding: 8px 0;
+    border-width: 2px; /* Немного тоньше линии на мобильных */
+  }
+  
+  .decision-block.judge-signature {
+    margin-top: 32px !important;
+    padding-top: 18px;
+    border-top-width: 1px;
+  }
+  
+  .decision-fade {
+    height: 80px;
+  }
+  
+  .decision-expand-button,
+  .decision-collapse-button {
+    padding: 8px 18px;
   }
 }

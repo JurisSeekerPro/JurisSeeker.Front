@@ -355,7 +355,6 @@ export default function CaseDetailPage() {
               <div className="case-section">
                 <div className="section-header">
                   <h2 className="section-title">
-                    Текст решения
                     {courtCase.decisionType && (
                       <span className="decision-type-badge">{courtCase.decisionType}</span>
                     )}
