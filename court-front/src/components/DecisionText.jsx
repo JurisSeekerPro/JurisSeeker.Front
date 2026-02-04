@@ -17,9 +17,12 @@ const DecisionText = ({ content, className = '' }) => {
     const noIndentPatterns = [
       /^к делу №/i,
       /^РЕШЕНИЕ$/i,
+      /^Р Е Ш Е Н И Е$/i, // Для случая с пробелами
       /^Именем Российской Федерации$/i,
       /^УСТАНОВИЛ:$/i,
+      /^У С Т А Н О В И Л:$/i, // Для случая с пробелами
       /^РЕШИЛ:$/i,
+      /^Р Е Ш И Л:$/i, // Для случая с пробелами
       /^Дело №/i,
       /^Судья\s+[А-ЯЁ]/i,
       /^Председательствующий/i,
@@ -27,6 +30,7 @@ const DecisionText = ({ content, className = '' }) => {
       /^\d{1,2}\.\d{1,2}\.\d{4}/,   // Дата в формате ДД.ММ.ГГГГ
       /^[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\./i, // ФИО в начале
       /^[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\.[А-ЯЁ]\./i,    // ФИО с инициалами
+      /^УИД\s+\d+/i, // УИД номер
     ];
     
     // Проверяем, соответствует ли текст шаблонам без отступа
@@ -38,15 +42,63 @@ const DecisionText = ({ content, className = '' }) => {
     return true;
   };
 
+  // Очистка HTML от мусора в начале
+  const cleanHTMLStart = (html) => {
+    // 1. Удаляем HTML entities типа &nbsp;
+    html = html.replace(/&nbsp;/gi, ' ');
+    html = html.replace(/&amp;/gi, '&');
+    html = html.replace(/&lt;/gi, '<');
+    html = html.replace(/&gt;/gi, '>');
+    html = html.replace(/&quot;/gi, '"');
+    html = html.replace(/&#39;/gi, "'");
+    
+    // 2. Удаляем конкретные артефакты типа "bsp;"
+    html = html.replace(/bsp;\s*/gi, '');
+    
+    // 3. Находим начало реального текста решения
+    // Ищем первый осмысленный параграф
+    const firstMeaningfulParagraph = html.search(/<p[^>]*>.*?(к делу|Дело|РЕШЕНИЕ|Именем|Установил|Рассмотрев)/i);
+    
+    if (firstMeaningfulParagraph > 0) {
+      // Удаляем всё до первого осмысленного параграфа
+      html = html.substring(firstMeaningfulParagraph);
+    }
+    
+    // 4. Удаляем все теги кроме <p> и их содержимого до первого <p>
+    const firstPTag = html.indexOf('<p');
+    if (firstPTag > 0) {
+      html = html.substring(firstPTag);
+    }
+    
+    return html;
+  };
+
   // Обработка контента при загрузке
   useEffect(() => {
     if (!content) return;
 
     const processContent = (html) => {
-      // 1. Удаляем пустые title
-      html = html.replace(/<title><\/title>/g, '');
+      // 1. ОЧИСТКА НАЧАЛА ДОКУМЕНТА
+      html = cleanHTMLStart(html);
       
-      // 2. УДАЛЯЕМ защищенные теги, оставляя только текст внутри
+      // 2. УДАЛЯЕМ ВСЕ ЛИШНИЕ ТЕГИ И ВЫРЕЗКИ
+      html = html
+        // Удаляем пустые title
+        .replace(/<title><\/title>/g, '')
+        // Удаляем blockquote теги и их атрибуты
+        .replace(/<blockquote[^>]*>/gi, '')
+        .replace(/<\/blockquote>/gi, '')
+        // Удаляем div с любыми классами до первого <p>
+        .replace(/<div[^>]*>[\s\S]*?(?=<p)/gi, '')
+        .replace(/<\/div>/gi, '')
+        // Удаляем h3 заголовки
+        .replace(/<h3[^>]*>.*?<\/h3>/gi, '')
+        // Удаляем itemprop атрибуты
+        .replace(/itemprop="[^"]*"/gi, '')
+        // Удаляем пустые параграфы
+        .replace(/<p[^>]*>\s*<\/p>/g, '');
+      
+      // 3. УДАЛЯЕМ защищенные теги, оставляя только текст внутри
       html = html
         .replace(/<ФИО>([^<]*)<\/ФИО>/gi, '$1')
         .replace(/<адрес>([^<]*)<\/адрес>/gi, '$1')
@@ -55,23 +107,50 @@ const DecisionText = ({ content, className = '' }) => {
         .replace(/<данные изъяты>([^<]*)<\/данные изъяты>/gi, '[скрыто]')
         .replace(/<адрес><адрес>([^<]*)<\/адрес><\/адрес>/gi, '$1');
       
-      // 3. Парсим HTML с помощью DOMParser для точной обработки
+      // 4. Используем DOMParser для безопасного парсинга
       const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      let doc;
       
-      // 4. Обрабатываем все элементы
+      try {
+        // Оборачиваем в div для корректного парсинга
+        doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      } catch (error) {
+        console.error('Ошибка парсинга HTML:', error);
+        // Возвращаем очищенный текст как есть
+        return html.replace(/<[^>]+>/g, '');
+      }
+      
+      // 5. Обрабатываем все элементы
       const processNode = (node) => {
         if (node.nodeType === Node.TEXT_NODE) {
-          return node.textContent;
+          // Очищаем текст от лишних пробелов, но сохраняем нормальные
+          let text = node.textContent;
+          text = text.replace(/\s+/g, ' ');
+          text = text.replace(/^\s+|\s+$/g, '');
+          return text;
         }
         
         if (node.nodeType === Node.ELEMENT_NODE) {
           const tagName = node.tagName.toLowerCase();
-          const text = node.textContent.trim();
+          
+          // ИГНОРИРУЕМ НЕНУЖНЫЕ ТЕГИ
+          if (tagName === 'blockquote' || tagName === 'h3' || tagName === 'div') {
+            // Просто обрабатываем детей, игнорируя сам тег
+            let result = '';
+            Array.from(node.childNodes).forEach(child => {
+              result += processNode(child);
+            });
+            return result;
+          }
           
           // Для тега p - определяем стиль
           if (tagName === 'p') {
             const style = node.getAttribute('style') || '';
+            const text = node.textContent.trim();
+            
+            // Пропускаем пустые параграфы
+            if (!text) return '';
+            
             const hasCenter = style.includes('TEXT-ALIGN: center') || 
                              style.includes('text-align: center');
             const hasJustify = style.includes('TEXT-ALIGN: justify') || 
@@ -96,19 +175,21 @@ const DecisionText = ({ content, className = '' }) => {
             // Специальные классы на основе содержания
             if (/^к делу №/i.test(text)) {
               classes += ' case-reference';
-            } else if (/^РЕШЕНИЕ$/i.test(text)) {
+            } else if (/^РЕШЕНИЕ$/i.test(text) || /^Р Е Ш Е Н И Е$/i.test(text)) {
               classes += ' main-title';
             } else if (/^Именем Российской Федерации$/i.test(text)) {
               classes += ' document-title';
-            } else if (/^УСТАНОВИЛ:$/i.test(text)) {
+            } else if (/^УСТАНОВИЛ:$/i.test(text) || /^У С Т А Н О В И Л:$/i.test(text)) {
               classes += ' section-title';
-            } else if (/^РЕШИЛ:$/i.test(text)) {
+            } else if (/^РЕШИЛ:$/i.test(text) || /^Р Е Ш И Л:$/i.test(text)) {
               classes += ' section-title decision-title';
             } else if (/^Дело №/i.test(text)) {
               classes += ' case-number';
             } else if (/^Судья\s+[А-ЯЁ]/i.test(text) || 
                       /^Председательствующий/i.test(text)) {
               classes += ' judge-signature';
+            } else if (/^УИД\s+\d+/i.test(text)) {
+              classes += ' case-reference';
             } else if (/^\d{1,2}\s+[а-яё]+\s+\d{4}/i.test(text) || 
                       /^\d{1,2}\.\d{1,2}\.\d{4}/.test(text)) {
               classes += ' date-paragraph';
@@ -123,54 +204,46 @@ const DecisionText = ({ content, className = '' }) => {
             return `<div class="${classes}">${childContent}</div>`;
           }
           
-          // Для других тегов
-          if (tagName === 'table') {
-            return `<table class="decision-table">${node.innerHTML}</table>`;
-          }
-          
-          if (tagName === 'center') {
-            return `<div class="text-center">${node.innerHTML}</div>`;
-          }
-          
-          if (tagName === 'span') {
-            return `<span>${node.innerHTML}</span>`;
-          }
-          
-          // Рекурсивно обрабатываем другие элементы
-          let result = `<${tagName}`;
-          
-          // Копируем атрибуты (кроме style для p-тегов)
-          Array.from(node.attributes).forEach(attr => {
-            if (tagName !== 'p' || attr.name !== 'style') {
-              result += ` ${attr.name}="${attr.value}"`;
-            }
-          });
-          
-          result += '>';
-          
+          // Для других тегов - просто обрабатываем содержимое
+          let result = '';
           Array.from(node.childNodes).forEach(child => {
             result += processNode(child);
           });
           
-          result += `</${tagName}>`;
           return result;
         }
         
         return '';
       };
       
-      // Обрабатываем весь документ
+      // 6. Обрабатываем весь документ
       let result = '';
-      Array.from(doc.body.childNodes).forEach(child => {
-        result += processNode(child);
-      });
+      const body = doc.querySelector('div'); // Берем наш оберточный div
+      if (body) {
+        Array.from(body.childNodes).forEach(child => {
+          result += processNode(child);
+        });
+      }
       
-      // 5. Очищаем лишние пробелы и пустые блоки
+      // 7. ОЧИЩАЕМ РЕЗУЛЬТАТ ОТ ПУСТЫХ БЛОКОВ И ЛИШНИХ ПРОБЕЛОВ
       result = result
-        .replace(/\s+/g, ' ')
+        // Удаляем полностью пустые блоки
+        .replace(/<div class="[^"]*">\s*<\/div>/g, '')
+        // Удаляем блоки только с пробелами
+        .replace(/<div[^>]*>\s+<\/div>/g, '')
+        // Убираем лишние пробелы между тегами
         .replace(/>\s+</g, '><')
-        .replace(/<div class="decision-block">\s*<\/div>/g, '')
+        // Убираем множественные пробелы
+        .replace(/\s+/g, ' ')
+        // Удаляем пробелы в начале и конце
+        .replace(/^\s+/, '')
+        .replace(/\s+$/, '')
         .trim();
+      
+      // 8. Если после очистки ничего не осталось, возвращаем сообщение
+      if (!result || result.replace(/<[^>]+>/g, '').trim() === '') {
+        return '<div class="decision-block">Текст решения не содержит форматированного контента</div>';
+      }
       
       return result;
     };

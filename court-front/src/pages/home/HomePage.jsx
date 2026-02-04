@@ -8,6 +8,42 @@ import Pagination from "../../components/Pagination";
 import SearchFilters from "../../components/filters/SearchFilters";
 import "../../styles/components.css";
 
+// Константы для значений исхода дела (числовые для фронтенда, строковые для GraphQL)
+const CASE_OUTCOME_VALUES = {
+  UNKNOWN: 0,
+  PLAINTIFF_WON: 1,
+  DEFENDANT_WON: 2,
+  SETTLEMENT: 3,
+  CASE_DISMISSED: 4,
+  PARTIALLY_GRANTED: 5
+};
+
+// Функция для преобразования числового значения в строковый GraphQL enum
+const getOutcomeGraphQLValue = (value) => {
+  if (value === null || value === undefined) return null;
+  
+  switch(value) {
+    case 0: return "UNKNOWN";
+    case 1: return "PLAINTIFF_WON";
+    case 2: return "DEFENDANT_WON";
+    case 3: return "SETTLEMENT";
+    case 4: return "CASE_DISMISSED";
+    case 5: return "PARTIALLY_GRANTED";
+    default: return "UNKNOWN";
+  }
+};
+
+// Опции для выпадающего списка исхода дела
+const OUTCOME_OPTIONS = [
+  { value: null, label: "Любой исход" },
+  { value: CASE_OUTCOME_VALUES.PLAINTIFF_WON, label: "Истец выиграл" },
+  { value: CASE_OUTCOME_VALUES.DEFENDANT_WON, label: "Ответчик выиграл" },
+  { value: CASE_OUTCOME_VALUES.SETTLEMENT, label: "Мировое соглашение" },
+  { value: CASE_OUTCOME_VALUES.CASE_DISMISSED, label: "Дело прекращено" },
+  { value: CASE_OUTCOME_VALUES.PARTIALLY_GRANTED, label: "Частично удовлетворено" },
+  { value: CASE_OUTCOME_VALUES.UNKNOWN, label: "Неизвестно" },
+];
+
 // Базовые фильтры
 const DEFAULT_FILTERS = {
   searchText: "",
@@ -19,6 +55,7 @@ const DEFAULT_FILTERS = {
   dateFrom: "",
   dateTo: "",
   hasDecision: null,
+  outcome: null,
 };
 
 // Правильная сериализация с кодированием
@@ -32,6 +69,9 @@ const serializeFilters = (filters) => {
     } else if (value !== null && value !== undefined && value !== '' && value !== false) {
       if (typeof value === 'boolean') {
         params.set(key, value ? 'true' : 'false');
+      } else if (typeof value === 'number') {
+        // Для чисел сохраняем как строку
+        params.set(key, value.toString());
       } else {
         // НЕ кодируем - React Router сделает это сам
         params.set(key, String(value));
@@ -52,6 +92,10 @@ const deserializeFilters = (searchParams) => {
         filters[key] = value ? value.split(',') : [];
       } else if (typeof DEFAULT_FILTERS[key] === 'boolean' || key === 'hasDecision') {
         filters[key] = value === 'true' ? true : (value === 'false' ? false : null);
+      } else if (key === 'outcome') {
+        // Для outcome преобразуем строку в число или null
+        const num = parseInt(value, 10);
+        filters[key] = isNaN(num) ? null : num;
       } else {
         filters[key] = value;
       }
@@ -119,6 +163,7 @@ const GET_COURT_CASES_SIMPLE = gql`
           hasDecision
           judgeName
           courtType
+          outcome
         }
       }
       pageInfo {
@@ -216,6 +261,11 @@ export default function HomePage() {
         safeFilters.dateTo = paramsFilters.dateTo;
       }
       
+      // Добавляем фильтр по исходу дела
+      if (paramsFilters.outcome !== null && paramsFilters.outcome !== undefined) {
+        safeFilters.outcome = paramsFilters.outcome;
+      }
+      
       console.log("Восстановленные фильтры из URL:", safeFilters);
       setActiveFilters(safeFilters);
       setSearchPerformed(true);
@@ -268,6 +318,13 @@ export default function HomePage() {
       filterVars.hasDecision = activeFilters.hasDecision === true || activeFilters.hasDecision === "true";
     }
     
+    // Фильтр по исходу дела - используем строковые значения ENUM для GraphQL
+    if (activeFilters.outcome !== null && activeFilters.outcome !== undefined) {
+      filterConditions.push(`outcome: { eq: $outcome }`);
+      // Преобразуем числовое значение в строковое ENUM значение
+      filterVars.outcome = getOutcomeGraphQLValue(activeFilters.outcome);
+    }
+    
     // Диапазон дат - добавляем только если есть обе даты
     if (activeFilters.dateFrom && activeFilters.dateTo) {
       filterConditions.push(`receivedDate: { gte: $dateFrom, lte: $dateTo }`);
@@ -291,6 +348,7 @@ export default function HomePage() {
           ${filterVars.defendant ? '$defendant: String' : ''}
           ${filterVars.judgeName ? '$judgeName: String' : ''}
           ${filterVars.hasDecision !== undefined ? '$hasDecision: Boolean' : ''}
+          ${filterVars.outcome ? '$outcome: CaseOutcome' : ''}
           ${filterVars.dateFrom ? '$dateFrom: String' : ''}
           ${filterVars.dateTo ? '$dateTo: String' : ''}
         ) {
@@ -313,6 +371,7 @@ export default function HomePage() {
                 hasDecision
                 judgeName
                 courtType
+                outcome
               }
             }
             pageInfo {
@@ -344,6 +403,7 @@ export default function HomePage() {
     },
     onError: (err) => {
       console.error("GraphQL ошибка:", err.message);
+      console.error("Подробности:", err);
     },
   });
 
@@ -428,6 +488,11 @@ export default function HomePage() {
       safeFilters.hasDecision = searchFilters.hasDecision;
     }
     
+    // Добавляем фильтр по исходу дела (числовое значение)
+    if (searchFilters.outcome !== null && searchFilters.outcome !== undefined) {
+      safeFilters.outcome = searchFilters.outcome;
+    }
+    
     // Диапазон дат - только если есть обе даты
     if (searchFilters.dateFrom && searchFilters.dateTo) {
       safeFilters.dateFrom = searchFilters.dateFrom;
@@ -465,11 +530,12 @@ export default function HomePage() {
         onSearch={handleSearch}
         onClear={handleClearSearch}
         compact={false}
+        outcomeOptions={OUTCOME_OPTIONS}
       />
 
       {/* Состояние после поиска */}
       {searchPerformed && (
-        <div ref={resultsContainerRef}> {/* Добавляем ref для скролла */}
+        <div ref={resultsContainerRef}>
           {loading && (
             <div className="text-center py-8">
               <div className="spinner mx-auto"></div>
@@ -482,6 +548,7 @@ export default function HomePage() {
               <div className="p-4 border border-red-300 rounded-lg bg-red-50">
                 <p className="font-bold">Ошибка загрузки:</p>
                 <p className="mt-1">{error.message}</p>
+                <p className="mt-1 text-sm">Проверьте параметры фильтрации</p>
                 <button 
                   className="button button-primary mt-3"
                   onClick={() => refetch()}
@@ -500,7 +567,6 @@ export default function HomePage() {
 
           {!loading && !error && currentCases && currentCases.length > 0 ? (
             <>
-              {/* Можно добавить заголовок с количеством результатов */}
               <div className="results-header" style={{ minHeight: '1px' }}>
                 {/* Невидимый элемент для скролла */}
               </div>

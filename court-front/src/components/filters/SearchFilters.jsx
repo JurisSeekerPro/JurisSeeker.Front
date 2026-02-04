@@ -3,9 +3,15 @@ import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RegionSelector from "./RegionSelector";
 
-const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compact = false }) => {
+const SearchFilters = ({ 
+  filters = {}, 
+  onFiltersChange, 
+  onSearch, 
+  onClear, 
+  compact = false,
+  outcomeOptions = []
+}) => {
   const [activeSection, setActiveSection] = useState("basic");
-  const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef(null);
 
   const sections = {
@@ -20,6 +26,17 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
     { label: "За текущий год", value: "currentYear" },
     { label: "За прошлый год", value: "lastYear" },
     { label: "Произвольный период", value: "custom" }
+  ];
+
+  // Опции для исхода дела по умолчанию
+  const defaultOutcomeOptions = outcomeOptions.length > 0 ? outcomeOptions : [
+    { value: null, label: "Любой исход" },
+    { value: 0, label: "Неизвестно" },
+    { value: 1, label: "Истец выиграл" },
+    { value: 2, label: "Ответчик выиграл" },
+    { value: 3, label: "Мировое соглашение" },
+    { value: 4, label: "Дело прекращено" },
+    { value: 5, label: "Частично удовлетворено" }
   ];
 
   const safeArray = (arr) => Array.isArray(arr) ? arr : [];
@@ -90,7 +107,7 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
   };
 
   const hasActiveFilters = Object.values(filters).some(val =>
-    (Array.isArray(val) ? val.length > 0 : val !== "" && val !== null && val !== undefined)
+    (Array.isArray(val) ? val.length > 0 : val !== "" && val !== null && val !== undefined && val !== false)
   );
 
   return (
@@ -180,6 +197,23 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
                   onChange={(e) => handleInputChange("defendant", e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
+
+                {/* Исход дела - НОВОЕ ПОЛЕ */}
+                <label className="form-label mt-md">Исход дела</label>
+                <select
+                  className="form-input"
+                  value={filters.outcome === null || filters.outcome === undefined ? "" : filters.outcome}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    handleInputChange("outcome", value === "" ? null : parseInt(value, 10));
+                  }}
+                >
+                  {defaultOutcomeOptions.map((option) => (
+                    <option key={option.value === null ? "any" : option.value} value={option.value === null ? "" : option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
 
                 {/* Чекбокс наличия решения */}
                 <div className="mt-md">
@@ -289,6 +323,11 @@ const SearchFilters = ({ filters = {}, onFiltersChange, onSearch, onClear, compa
           )}
           {filters.defendant && (
             <span className="active-filter">Ответчик: {filters.defendant}</span>
+          )}
+          {filters.outcome !== null && filters.outcome !== undefined && (
+            <span className="active-filter">
+              Исход: {defaultOutcomeOptions.find(o => o.value === filters.outcome)?.label || `Исход ${filters.outcome}`}
+            </span>
           )}
           {safeArray(filters.regions).map(r => (
             <span key={r} className="active-filter">Регион: {r}</span>

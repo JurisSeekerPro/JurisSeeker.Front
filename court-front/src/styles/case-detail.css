@@ -60,10 +60,10 @@
 
 /* Улучшенные стили для заголовка дела */
 .case-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 20px;
+  margin-bottom: 24px; /* Увеличил с 20px до 24px */
   line-height: 1.3;
   width: 100%;
   word-break: break-word;
@@ -81,13 +81,14 @@
   max-width: 100%;
 }
 
+
 .case-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
+  padding: 8px 16px; /* Увеличил вертикальные padding */
   background: #f0f7ff;
   color: #0066cc;
-  border-radius: 6px;
+  border-radius: 8px; /* Увеличил радиус скругления */
   font-size: 14px;
   font-weight: 500;
   border: 1px solid rgba(0, 102, 204, 0.2);
@@ -96,7 +97,7 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  height: 32px;
+  height: 36px; /* Увеличил высоту */
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -107,6 +108,28 @@
   border-color: #dee2e6;
 }
 
+.case-badge.outline {
+  background: transparent;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+/* Основной номер дела - делаем его немного заметнее */
+.case-badge:first-child {
+  background: #e7f1ff;
+  color: #0056b3;
+  border-color: #b3d4ff;
+  font-weight: 600;
+  order: 1;
+}
+
+.case-badge.secondary {
+  order: 2;
+}
+
+.case-badge.outline {
+  order: 3;
+}
 .case-badge.outline {
   background: transparent;
   border-color: #dee2e6;
@@ -920,5 +943,208 @@ html, body {
   .detail-value {
     text-align: left;
     width: 100%;
+  }
+}
+
+/* Добавить в конец src/styles/case-detail.css */
+
+/* Стили для секции с решением */
+.decision-type-badge {
+  background: #4a6fa5;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 12px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* Контейнер для ссылки на решение */
+.decision-link-container {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Ссылка на внешнее решение - СДЕРЖАННЫЕ СТИЛИ */
+.decision-external-link {
+  display: block;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s ease;
+  margin-bottom: 12px;
+}
+
+.decision-external-link:hover {
+  background: #f1f3f5;
+  border-color: #ced4da;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Содержимое ссылки */
+.decision-link-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Иконка */
+.decision-link-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+.decision-external-link:hover .decision-link-icon {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Текст ссылки */
+.decision-link-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.decision-link-title {
+  font-weight: 500; /* Полужирный, но не жирный */
+  font-size: 15px;
+  color: #2d3748;
+  margin-bottom: 2px;
+  transition: color 0.15s ease;
+}
+
+.decision-external-link:hover .decision-link-title {
+  color: #1a202c;
+}
+
+/* Стрелка */
+.decision-link-arrow {
+  font-size: 18px;
+  color: #4a6fa5;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: all 0.15s ease;
+}
+
+.decision-external-link:hover .decision-link-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* Сообщение о недоступности текста */
+.no-decision-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.no-decision-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.no-decision-message {
+  font-size: 15px;
+  color: #718096;
+  font-style: italic;
+}
+
+/* Адаптивность для секции решения */
+@media (max-width: 768px) {
+  .decision-link-content {
+    gap: 12px;
+  }
+  
+  .decision-link-icon {
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+  }
+  
+  .decision-link-title {
+    font-size: 14px;
+  }
+  
+  .decision-external-link {
+    padding: 14px 16px;
+  }
+  
+  .decision-link-arrow {
+    font-size: 16px;
+  }
+  
+  .no-decision-icon {
+    font-size: 32px;
+  }
+  
+  .no-decision-message {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .decision-link-content {
+    gap: 10px;
+  }
+  
+  .decision-link-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .decision-external-link {
+    padding: 12px 14px;
+  }
+  
+  .no-decision-icon {
+    font-size: 28px;
+  }
+}
+
+
+/* Стили для grid с 4 элементами */
+.names-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.names-grid-4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .names-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .names-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .names-grid-4 {
+    grid-template-columns: 1fr;
   }
 }

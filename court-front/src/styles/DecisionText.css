@@ -3,9 +3,9 @@
   position: relative;
   width: 100%;
   font-family: 'Georgia', 'Times New Roman', serif;
-  line-height: 1.6; /* Увеличили межстрочный */
-  color: #2d3748; /* Более темный серый */
-  background: transparent; /* Убрали белый фон */
+  line-height: 1.6;
+  color: #2d3748;
+  background: transparent;
   margin: 0;
 }
 
@@ -16,34 +16,35 @@
 }
 
 .decision-container.collapsed {
-  max-height: 700px; /* Увеличили высоту */
+  max-height: 700px;
 }
 
 .decision-container.expanded {
   max-height: none;
 }
 
-/* Основной контент - БОЛЬШЕ ПРОСТРАНСТВА */
+/* Основной контент - БЕЗ ФОНА */
 .decision-content {
-  font-size: 16px; /* Увеличили размер шрифта */
-  padding: 32px; /* Больше отступов */
-  line-height: 1.6; /* Больше воздуха между строками */
+  font-size: 16px;
+  padding: 24px 0; /* Убрали боковые отступы */
+  line-height: 1.6;
   max-width: 100%;
+  background: transparent !important;
 }
 
 /* === БАЗОВЫЕ БЛОКИ === */
 .decision-block {
-  margin: 0 0 16px 0; /* Увеличили отступ снизу */
-  line-height: 1.6; /* Больше межстрочный интервал */
+  margin: 0 0 16px 0;
+  line-height: 1.6;
   color: #2d3748;
   text-align: left;
-  min-height: 1.2em;
+  background: transparent !important;
 }
 
 /* Выравнивание */
 .decision-block.text-center {
   text-align: center !important;
-  margin: 20px 0 !important; /* Увеличили отступы */
+  margin: 20px 0 !important;
 }
 
 .decision-block.text-justify {
@@ -56,10 +57,10 @@
   text-align: right !important;
 }
 
-/* ОТСТУП КРАСНОЙ СТРОКИ */
+/* ОТСТУП КРАСНОЙ СТРОКИ - ОСНОВНОЕ ПРАВИЛО */
 .decision-block.has-indent {
-  text-indent: 28px !important; /* Увеличили отступ */
-  margin-bottom: 16px !important; /* Увеличили отступ снизу */
+  text-indent: 24px !important; /* Уменьшили до стандартного */
+  margin-bottom: 16px !important;
 }
 
 /* ИСКЛЮЧЕНИЯ - блоки БЕЗ отступа красной строки */
@@ -69,7 +70,6 @@
 .decision-block.document-title,
 .decision-block.section-title,
 .decision-block.judge-signature,
-.decision-block.date-paragraph,
 .decision-block.text-center,
 .decision-block.text-right {
   text-indent: 0 !important;
@@ -81,162 +81,151 @@
 .decision-block.case-reference {
   text-align: right;
   font-size: 14px;
-  color: #718096; /* Серый цвет */
+  color: #718096;
   font-style: italic;
-  margin-bottom: 24px; /* Больше отступ */
-  padding-bottom: 12px; /* Больше отступ */
+  margin-bottom: 16px;
 }
 
 /* Номер дела */
 .decision-block.case-number {
   font-size: 14px;
-  color: #718096; /* Серый цвет */
-  margin-bottom: 12px; /* Больше отступ */
-  text-indent: 0 !important;
+  color: #718096;
+  margin-bottom: 8px;
 }
 
-/* ГЛАВНЫЙ ЗАГОЛОВОК "РЕШЕНИЕ" - БОЛЬШЕ И ВЫРАЗИТЕЛЬНЕЕ */
+/* ГЛАВНЫЙ ЗАГОЛОВОК "РЕШЕНИЕ" */
 .decision-block.main-title {
   font-family: 'Arial', sans-serif;
   font-weight: 700;
-  font-size: 22px; /* Увеличили размер */
+  font-size: 20px;
   text-transform: uppercase;
-  letter-spacing: 1.5px; /* Больше расстояния между буквами */
+  letter-spacing: 1px;
   text-align: center;
-  color: #1a202c; /* Очень темный серый */
-  margin: 32px 0 24px 0 !important; /* Увеличили отступы */
-  padding: 12px 0; /* Больше отступы сверху/снизу */
-  border-top: 3px solid #1a202c; /* Более толстая линия */
-  border-bottom: 3px solid #1a202c; /* Более толстая линия */
+  color: #1a202c;
+  margin: 24px 0 16px 0 !important;
   line-height: 1.3;
-  text-indent: 0 !important;
 }
 
 /* "Именем Российской Федерации" */
 .decision-block.document-title {
   font-family: 'Arial', sans-serif;
   font-weight: 600;
-  font-size: 18px; /* Увеличили размер */
+  font-size: 17px;
   text-align: center;
   color: #1a202c;
-  margin: 28px 0 !important; /* Увеличили отступы */
+  margin: 20px 0 !important;
   line-height: 1.3;
-  text-indent: 0 !important;
 }
 
-/* "УСТАНОВИЛ:" и "РЕШИЛ:" - ПРОСТО ТЕКСТ, БЕЗ ФОНА */
+/* "УСТАНОВИЛ:" и "РЕШИЛ:" */
 .decision-block.section-title {
   font-family: 'Arial', sans-serif;
   font-weight: 700;
-  font-size: 18px; /* Увеличили размер */
+  font-size: 17px;
   text-align: center;
   color: #1a202c;
-  margin: 32px 0 20px 0 !important; /* Увеличили отступы */
+  margin: 24px 0 16px 0 !important;
   text-transform: uppercase;
   line-height: 1.3;
-  text-indent: 0 !important;
-  /* Убрали весь фон и границы */
-  background: none !important;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
 }
 
-/* Особый стиль для "РЕШИЛ:" - тоже без фона */
+/* Особый стиль для "РЕШИЛ:" */
 .decision-block.section-title.decision-title {
-  /* Убрали все специальные стили */
-  background: none !important;
-  border: none !important;
-  margin-top: 36px !important; /* Больше отступ сверху */
-  margin-bottom: 24px !important; /* Больше отступ снизу */
+  margin-top: 28px !important;
+  margin-bottom: 20px !important;
 }
 
-/* Параграфы с датой в начале */
+/* Параграфы с датой в начале - ИСПРАВЛЕНО: должны иметь отступ */
 .decision-block.date-paragraph {
-  margin-bottom: 18px !important; /* Увеличили отступ */
-  color: #4a5568; /* Серый цвет */
-  text-indent: 0 !important;
+  margin-bottom: 16px !important;
+  color: #2d3748 !important; /* Тот же цвет что и основной текст */
+  text-indent: 24px !important; /* ДОБАВЛЕНО: отступ красной строки */
 }
 
-/* Подпись судьи - БОЛЬШЕ ОТСТУПЫ */
+/* Подпись судьи */
 .decision-block.judge-signature {
   text-align: right;
-  margin-top: 48px !important; /* Увеличили отступ сверху */
+  margin-top: 32px !important;
   margin-bottom: 0 !important;
-  padding-top: 24px; /* Увеличили отступ сверху */
-  border-top: 2px dashed #cbd5e0; /* Более темная пунктирная линия */
-  font-weight: 600; /* Полужирный */
-  color: #4a5568; /* Серый цвет */
-  text-indent: 0 !important;
-  font-size: 15px; /* Немного больше */
+  padding-top: 16px;
+  border-top: 1px dashed #cbd5e0;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 14px;
 }
 
-/* ПРАВИЛА ДЛЯ ОСНОВНОГО ТЕКСТА */
-/* Все блоки, которые не являются специальными и имеют отступ */
-.decision-block.has-indent:not(.text-center):not(.text-right):not(.case-reference):not(.case-number):not(.main-title):not(.document-title):not(.section-title):not(.judge-signature):not(.date-paragraph) {
+/* ПРАВИЛА ДЛЯ ОСНОВНОГО ТЕКСТА - УПРОЩЕНЫ */
+/* Все блоки с has-indent (включая date-paragraph) */
+.decision-block.has-indent {
   text-align: justify;
-  text-indent: 28px !important; /* Увеличили отступ красной строки */
-  margin-bottom: 16px !important; /* Увеличили отступ снизу */
+  text-indent: 24px !important;
+  margin-bottom: 16px !important;
 }
 
-/* Блоки без отступа (обычно начала предложений после заголовков) */
-.decision-block:not(.has-indent):not(.text-center):not(.text-right):not(.case-reference):not(.case-number):not(.main-title):not(.document-title):not(.section-title):not(.judge-signature):not(.date-paragraph) {
+/* Блоки без отступа */
+.decision-block:not(.has-indent):not(.text-center):not(.text-right):not(.case-reference):not(.case-number):not(.main-title):not(.document-title):not(.section-title):not(.judge-signature) {
   text-align: justify;
   text-indent: 0 !important;
-  margin-bottom: 16px !important; /* Увеличили отступ снизу */
+  margin-bottom: 16px !important;
 }
 
-/* === ТАБЛИЦЫ === */
+/* === ТАБЛИЦЫ - УПРОЩЕНЫ === */
 .decision-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 24px 0; /* Увеличили отступы */
-  font-size: 15px; /* Увеличили размер шрифта */
-  border: 1px solid #e2e8f0; /* Светлее граница */
+  margin: 20px 0;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  background: transparent !important;
 }
 
 .decision-table td,
 .decision-table th {
-  border: 1px solid #e2e8f0; /* Светлее граница */
-  padding: 10px 14px; /* Увеличили отступы внутри ячеек */
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
   text-align: left;
-  line-height: 1.5; /* Больше межстрочный */
+  line-height: 1.4;
+  background: transparent !important;
 }
 
 .decision-table th {
-  background-color: #f7fafc; /* Очень светлый серый фон */
-  font-weight: 600; /* Полужирный */
+  font-weight: 600;
   color: #2d3748;
+}
+
+/* Убираем фон у четных строк */
+.decision-table tr:nth-child(even) {
+  background: transparent !important;
 }
 
 /* === СПИСКИ === */
 .decision-content ul,
 .decision-content ol {
-  margin: 16px 0 16px 28px; /* Увеличили отступы */
+  margin: 12px 0 12px 24px;
   padding: 0;
 }
 
 .decision-content li {
-  margin-bottom: 10px; /* Увеличили отступ снизу */
-  line-height: 1.5; /* Больше межстрочный */
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
-/* === КНОПКИ РАЗВЕРТЫВАНИЯ === */
+/* === КНОПКИ РАЗВЕРТЫВАНИЯ - УПРОЩЕНЫ === */
 .decision-fade {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px; /* Увеличили высоту градиента */
+  height: 80px;
   background: linear-gradient(to bottom, 
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.8) 70%,
     rgba(255, 255, 255, 1) 100%
   );
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 20px; /* Увеличили отступ снизу */
+  padding-bottom: 16px;
 }
 
 .decision-expand-button,
@@ -244,28 +233,24 @@
   background: #4a6fa5;
   color: white;
   border: none;
-  padding: 10px 24px; /* Увеличили отступы */
-  border-radius: 6px; /* Меньше скругление */
-  font-size: 14px; /* Увеличили размер шрифта */
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Более мягкая тень */
+  transition: all 0.2s ease;
   font-family: 'Arial', sans-serif;
 }
 
 .decision-expand-button:hover,
 .decision-collapse-button:hover {
   background: #3a5a8c;
-  transform: translateY(-2px); /* Более заметный эффект при наведении */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .decision-collapse-button {
   display: block;
-  margin: 24px auto 0; /* Увеличили отступ сверху */
-  background: #718096; /* Серый цвет */
-  min-width: 120px;
+  margin: 16px auto 0;
+  background: #718096;
 }
 
 .decision-collapse-button:hover {
@@ -274,102 +259,94 @@
 
 /* Пустой контент */
 .decision-empty {
-  padding: 48px; /* Увеличили отступы */
+  padding: 32px;
   text-align: center;
   color: #a0aec0;
   font-style: italic;
-  font-size: 16px; /* Увеличили размер шрифта */
+  font-size: 15px;
+  background: transparent !important;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .decision-content {
     font-size: 15px;
-    padding: 24px; /* Сохраняем достаточно отступов */
+    padding: 16px 0;
   }
   
   .decision-block {
-    margin-bottom: 14px; /* Увеличили отступ снизу */
-    line-height: 1.55; /* Сохраняем хороший интервал */
+    margin-bottom: 12px;
+    line-height: 1.5;
   }
   
   .decision-block.has-indent {
-    text-indent: 24px !important; /* Сохраняем отступ */
+    text-indent: 20px !important;
   }
   
   .decision-block.main-title {
-    font-size: 20px; /* Немного уменьшили, но все еще крупный */
-    margin: 28px 0 20px 0 !important;
-    padding: 10px 0;
+    font-size: 18px;
+    margin: 20px 0 14px 0 !important;
   }
   
   .decision-block.document-title {
-    font-size: 17px;
-    margin: 24px 0 !important;
+    font-size: 16px;
+    margin: 16px 0 !important;
   }
   
   .decision-block.section-title {
-    font-size: 17px;
-    margin: 28px 0 18px 0 !important;
+    font-size: 16px;
+    margin: 20px 0 14px 0 !important;
   }
   
   .decision-block.judge-signature {
-    margin-top: 36px !important;
-    padding-top: 20px;
-    font-size: 14px;
+    margin-top: 24px !important;
+    padding-top: 12px;
+    font-size: 13px;
   }
   
   .decision-table {
-    font-size: 14px;
-    margin: 20px 0;
+    font-size: 13px;
+    margin: 16px 0;
   }
   
   .decision-table td,
-  .decision-table th {
-    padding: 8px 12px;
+  .cision-table th {
+    padding: 6px 10px;
   }
   
   .decision-fade {
-    height: 90px;
-    padding-bottom: 16px;
+    height: 60px;
+    padding-bottom: 12px;
   }
   
   .decision-expand-button,
   .decision-collapse-button {
-    padding: 9px 20px;
-    font-size: 13px;
+    padding: 6px 16px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .decision-content {
     font-size: 14px;
-    padding: 20px; /* Сохраняем отступы */
   }
   
   .decision-block.has-indent {
-    text-indent: 20px !important; /* Сохраняем отступ красной строки */
+    text-indent: 16px !important;
   }
   
   .decision-block.main-title {
-    font-size: 18px;
-    margin: 24px 0 18px 0 !important;
-    padding: 8px 0;
-    border-width: 2px; /* Немного тоньше линии на мобильных */
+    font-size: 16px;
+    margin: 16px 0 12px 0 !important;
   }
   
   .decision-block.judge-signature {
-    margin-top: 32px !important;
-    padding-top: 18px;
+    margin-top: 20px !important;
+    padding-top: 10px;
     border-top-width: 1px;
   }
   
   .decision-fade {
-    height: 80px;
-  }
-  
-  .decision-expand-button,
-  .decision-collapse-button {
-    padding: 8px 18px;
+    height: 50px;
   }
 }
