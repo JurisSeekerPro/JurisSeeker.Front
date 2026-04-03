@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // Ленивая загрузка страниц
 const HomePage = lazy(() => import("../../pages/home/HomePage"));
-const AnalyzePage = lazy(() => import("../../pages/AnalyzePage"));
+const AnaliticsPage = lazy(() => import("../../pages/AnaliticsPage"));
 const CaseDetailPage = lazy(() => import("../../pages/CaseDetailPage"));
 const LoginPage = lazy(() => import("../../pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("../../pages/auth/RegisterPage"));
@@ -26,6 +26,7 @@ export default function AppRoutes() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/case/:id" element={<CaseDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/analitics" element={<AnaliticsPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
