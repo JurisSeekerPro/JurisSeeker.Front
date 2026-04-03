@@ -1,6 +1,8 @@
 // src/pages/analytics/AnalyticsPage.jsx
 import React, { useState } from 'react';
 import { useQuery } from "@apollo/client/react";
+import { useNavigate } from 'react-router-dom'; 
+
 import { gql } from "@apollo/client";
 import StatsCard from '../components/analytics/StatsCard';
 import RegionTable from '../components/analytics/RegionTable';
@@ -47,6 +49,8 @@ const GET_ANALYTICS_DASHBOARD = gql`
 `;
 
 const AnalyticsPage = () => {
+  const navigate = useNavigate(); 
+
   const [limit, setLimit] = useState(10);
 
   const { loading, error, data } = useQuery(GET_ANALYTICS_DASHBOARD, {
@@ -122,12 +126,20 @@ const AnalyticsPage = () => {
   return (
     <div className="analytics-page">
       {/* Шапка */}
-      <div className="analytics-header">
-        <h1>Аналитика судебных дел</h1>
-        <div className="analytics-date">
-          Обновлено: {totalStats.calculatedAt 
-            ? new Date(totalStats.calculatedAt).toLocaleString('ru-RU')
-            : 'нет данных'}
+      <div className="analytics-header-actions">
+        <button 
+          onClick={() => navigate('/home')} 
+          className="back-button"
+        >
+          ← На главную
+        </button>
+        <div className="analytics-header">
+          <h1>Аналитика судебных дел</h1>
+          <div className="analytics-date">
+            Обновлено: {totalStats.calculatedAt 
+              ? new Date(totalStats.calculatedAt).toLocaleString('ru-RU')
+              : 'нет данных'}
+          </div>
         </div>
       </div>
 

@@ -17,7 +17,7 @@ const GET_COURT_CASE_BY_ID = gql`
       courtType
       region
       decisionType
-      decisionContent
+      decisionContentHtml
       link
       originalCaseLink
       hasDecision
@@ -343,8 +343,8 @@ export default function CaseDetailPage() {
                   <h2 className="section-title">{courtCase.decisionType}</h2>
                 </div>
                 <div className="section-body">
-                  {courtCase.decisionContent ? (
-                    <DecisionText content={courtCase.decisionContent} />
+                  {courtCase.decisionContentHtml ? (
+                    <DecisionText content={courtCase.decisionContentHtml} />
                   ) : courtCase.decisionLink ? (
                     <div className="decision-link-container">
                       <a

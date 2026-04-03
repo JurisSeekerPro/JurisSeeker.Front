@@ -1,9 +1,8 @@
-// src/utils/routes/AppRoutes.jsx
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// Ленивая загрузка страниц
 const HomePage = lazy(() => import("../../pages/home/HomePage"));
+const Navigation = lazy(() => import("../../components/Navigation"));
 const AnaliticsPage = lazy(() => import("../../pages/AnaliticsPage"));
 const CaseDetailPage = lazy(() => import("../../pages/CaseDetailPage"));
 const LoginPage = lazy(() => import("../../pages/auth/LoginPage"));
@@ -21,6 +20,7 @@ const PageLoader = () => (
 export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
+      <Navigation />
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />

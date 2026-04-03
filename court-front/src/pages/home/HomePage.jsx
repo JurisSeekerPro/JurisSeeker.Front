@@ -1,6 +1,6 @@
 // src/pages/home/HomePage.jsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate  } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import CaseCard from "../../components/CaseCard";
@@ -178,6 +178,7 @@ const GET_COURT_CASES_SIMPLE = gql`
 const flattenEdges = (edges) => (edges ? edges.map((e) => e.node) : []);
 
 export default function HomePage() {
+  const navigate = useNavigate(); 
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Ref для контейнера с результатами поиска
@@ -286,13 +287,26 @@ export default function HomePage() {
     const filterConditions = [];
     const filterVars = { ...baseVars };
 
+    
+    if (activeFilters.searchText?.trim()) {
+      filterConditions.push(`
+        OR: [
+          { caseNumber: { contains: $searchText } }
+          { plaintiff: { contains: $searchText } }
+          { defendant: { contains: $searchText } }
+          { judgeName: { contains: $searchText } }
+          { region: { contains: $searchText } }
+        ]
+      `);
+
+      filterVars.searchText = activeFilters.searchText.trim();
+    }
     // Добавляем фильтры по одному для надежности
     if (activeFilters.regions?.length > 0) {
-      // Для GraphQL передаем первый регион (если нужно несколько, нужен оператор `in`)
-      filterConditions.push(`region: { eq: $region }`);
-      filterVars.region = activeFilters.regions[0];
+      filterConditions.push(`region: { in: $regions }`);
+      filterVars.regions = activeFilters.regions;
     }
-    
+
     if (activeFilters.caseNumber?.trim()) {
       filterConditions.push(`caseNumber: { contains: $caseNumber }`);
       filterVars.caseNumber = activeFilters.caseNumber.trim();
@@ -342,13 +356,14 @@ export default function HomePage() {
         query GetCourtCasesWithFilters(
           $first: Int
           $after: String
-          ${filterVars.region ? '$region: String' : ''}
+          ${filterVars.searchText ? '$searchText: String' : ''}
+          ${filterVars.regions ? '$regions: [String!]' : ''}
           ${filterVars.caseNumber ? '$caseNumber: String' : ''}
           ${filterVars.plaintiff ? '$plaintiff: String' : ''}
           ${filterVars.defendant ? '$defendant: String' : ''}
           ${filterVars.judgeName ? '$judgeName: String' : ''}
           ${filterVars.hasDecision !== undefined ? '$hasDecision: Boolean' : ''}
-          ${filterVars.outcome ? '$outcome: CaseOutcome' : ''}
+        ${filterVars.outcome !== undefined ? '$outcome: CaseOutcome' : ''}
           ${filterVars.dateFrom ? '$dateFrom: String' : ''}
           ${filterVars.dateTo ? '$dateTo: String' : ''}
         ) {
@@ -463,6 +478,7 @@ export default function HomePage() {
     // Формируем безопасные фильтры
     const safeFilters = {};
     
+    
     // Добавляем только те фильтры, которые точно есть
     if (searchFilters.caseNumber?.trim()) {
       safeFilters.caseNumber = searchFilters.caseNumber.trim();
@@ -522,8 +538,6 @@ export default function HomePage() {
 
   return (
     <div className="page-container">
-      <h1 className="text-title mb-lg">Судебные дела</h1>
-
       <SearchFilters
         filters={filters}
         onFiltersChange={handleFilterChange}

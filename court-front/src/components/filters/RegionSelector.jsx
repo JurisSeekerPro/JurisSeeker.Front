@@ -129,7 +129,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
 
   return (
     <div className={`region-selector ${className}`}>
-      {/* Заголовок и управление */}
       <div className="region-header">
         <div className="region-title">
           Выбор регионов

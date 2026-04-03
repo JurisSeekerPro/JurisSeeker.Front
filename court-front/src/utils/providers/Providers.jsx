@@ -1,4 +1,3 @@
-// src/utils/providers/Providers.jsx
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
