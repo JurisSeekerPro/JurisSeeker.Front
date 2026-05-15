@@ -1,4 +1,3 @@
-// src/pages/auth/RegisterPage.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -89,7 +88,6 @@ const RegisterPage = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log("Регистрация:", formData);
-      // Здесь будет реальный API вызов
       navigate("/login?registered=true");
     } catch (error) {
       setErrors({ submit: "Ошибка при регистрации. Попробуйте снова." });
@@ -108,7 +106,7 @@ const RegisterPage = () => {
       >
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-icon">⚖️</span>
+            <span className="auth-logo-icon"></span>
             <span className="auth-logo-text">Juris Seeker</span>
           </div>
           <h1 className="auth-title">Создать аккаунт</h1>
@@ -120,7 +118,7 @@ const RegisterPage = () => {
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="fullName" className="form-label">
-              <span className="form-label-required">👤 ФИО</span>
+              <span className="form-label-required"> ФИО</span>
             </label>
             <input
               type="text"
@@ -134,14 +132,14 @@ const RegisterPage = () => {
             />
             {errors.fullName && (
               <div className="form-error">
-                ⚠️ {errors.fullName}
+                 {errors.fullName}
               </div>
             )}
           </div>
 
           <div className="form-group">
             <label htmlFor="email" className="form-label">
-              <span className="form-label-required">📧 Email</span>
+              <span className="form-label-required"> Email</span>
             </label>
             <input
               type="email"
@@ -155,14 +153,14 @@ const RegisterPage = () => {
             />
             {errors.email && (
               <div className="form-error">
-                ⚠️ {errors.email}
+                 {errors.email}
               </div>
             )}
           </div>
 
           <div className="form-group">
             <label htmlFor="password" className="form-label">
-              <span className="form-label-required">🔒 Пароль</span>
+              <span className="form-label-required"> Пароль</span>
             </label>
             <div className="password-input-container">
               <input
@@ -181,7 +179,7 @@ const RegisterPage = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
+                {showPassword ? "" : ""}
               </button>
             </div>
             {formData.password && (
@@ -201,14 +199,14 @@ const RegisterPage = () => {
             )}
             {errors.password && (
               <div className="form-error">
-                ⚠️ {errors.password}
+                 {errors.password}
               </div>
             )}
           </div>
 
           <div className="form-group">
             <label htmlFor="confirmPassword" className="form-label">
-              <span className="form-label-required">🔒 Подтверждение пароля</span>
+              <span className="form-label-required"> Подтверждение пароля</span>
             </label>
             <input
               type={showPassword ? "text" : "password"}
@@ -222,7 +220,7 @@ const RegisterPage = () => {
             />
             {errors.confirmPassword && (
               <div className="form-error">
-                ⚠️ {errors.confirmPassword}
+                 {errors.confirmPassword}
               </div>
             )}
           </div>
@@ -245,13 +243,13 @@ const RegisterPage = () => {
           </div>
           {errors.agreeToTerms && (
             <div className="form-error">
-              ⚠️ {errors.agreeToTerms}
+               {errors.agreeToTerms}
             </div>
           )}
 
           {errors.submit && (
             <div className="form-error">
-              ⚠️ {errors.submit}
+               {errors.submit}
             </div>
           )}
 
@@ -266,7 +264,7 @@ const RegisterPage = () => {
                 Регистрация...
               </>
             ) : (
-              "🚀 Создать аккаунт"
+              " Создать аккаунт"
             )}
           </button>
         </form>
@@ -275,11 +273,11 @@ const RegisterPage = () => {
 
         <div className="social-auth">
           <button className="social-button social-button-google" disabled={isLoading}>
-            <span>🔍</span>
+            <span></span>
             Google
           </button>
           <button className="social-button social-button-github" disabled={isLoading}>
-            <span>💻</span>
+            <span></span>
             GitHub
           </button>
         </div>

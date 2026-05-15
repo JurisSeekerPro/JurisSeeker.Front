@@ -1,4 +1,3 @@
-// src/components/CaseCard.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/case-card.css';
@@ -11,7 +10,6 @@ export default function CaseCard({ courtCase }) {
     return courtCase.courtType || 'Судебное дело';
   };
 
-  // Форматируем дату
   const formatDate = (dateString) => {
     if (!dateString) return '—';
     
@@ -29,12 +27,9 @@ export default function CaseCard({ courtCase }) {
     }
   };
 
-  // Проверяем, есть ли решение
   const hasDecision = courtCase.hasDecision === true || courtCase.hasDecision === "true";
 
-  // Обработчик клика по всей карточке
   const handleCardClick = (e) => {
-    // Предотвращаем клик если нажали на кнопку "Подробнее"
     if (e.target.closest('.case-details-btn')) {
       return;
     }
@@ -45,7 +40,6 @@ export default function CaseCard({ courtCase }) {
     }
   };
 
-  // Обработчик клика по кнопке "Подробнее"
   const handleDetailsClick = () => {
     const caseId = courtCase.id;
     if (caseId) {

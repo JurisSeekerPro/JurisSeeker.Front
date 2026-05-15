@@ -1,4 +1,3 @@
-// src/components/DecisionRenderer.jsx
 import React, { useState, useMemo } from 'react';
 import './DecisionRenderer.css';
 
@@ -9,23 +8,19 @@ const DecisionRenderer = ({ content, showLineNumbers = false, maxHeight = null }
   const formattedContent = useMemo(() => {
     if (!content) return [];
     
-    // Разделяем на абзацы (пустые строки)
     const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
     
     return paragraphs.map((paragraph, index) => {
-      // Проверяем заголовки
       if (paragraph.match(/^### .* ###$/)) {
         const title = paragraph.replace(/^### (.*) ###$/, '$1');
         return { type: 'title', content: title, key: index };
       }
       
-      // Проверяем подзаголовки
       if (paragraph.match(/^==== .* ====$/)) {
         const subtitle = paragraph.replace(/^==== (.*) ====$/, '$1');
         return { type: 'subtitle', content: subtitle, key: index };
       }
       
-      // Проверяем жирный текст
       const boldMatches = paragraph.match(/\*\*(.*?)\*\*/g);
       let processedParagraph = paragraph;
       if (boldMatches) {
@@ -35,7 +30,6 @@ const DecisionRenderer = ({ content, showLineNumbers = false, maxHeight = null }
         });
       }
       
-      // Проверяем курсив
       const italicMatches = paragraph.match(/_(.*?)_/g);
       if (italicMatches) {
         italicMatches.forEach(match => {
@@ -44,13 +38,11 @@ const DecisionRenderer = ({ content, showLineNumbers = false, maxHeight = null }
         });
       }
       
-      // Проверяем списки
       if (paragraph.startsWith('• ') || paragraph.match(/^\d+\.\s/)) {
         const items = paragraph.split('\n').filter(item => item.trim());
         return { type: 'list', items, key: index };
       }
       
-      // Обычный абзац
       return { type: 'paragraph', content: processedParagraph, key: index };
     });
   }, [content]);
@@ -98,7 +90,6 @@ const DecisionRenderer = ({ content, showLineNumbers = false, maxHeight = null }
     });
   };
 
-  // Считаем количество символов для кнопки "Показать полностью"
   const characterCount = content ? content.length : 0;
   const shouldShowExpandButton = maxHeight && characterCount > 5000;
 

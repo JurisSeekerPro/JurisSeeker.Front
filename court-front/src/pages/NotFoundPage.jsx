@@ -1,8 +1,7 @@
-// src/pages/NotFoundPage.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/NotFound.css"; // Подключаем стили
+import "../styles/NotFound.css"; 
 
 const NotFoundPage = () => {
   return (
@@ -20,7 +19,7 @@ const NotFoundPage = () => {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
           >
-            🔍
+            
           </motion.div>
 
           <motion.h1
@@ -54,17 +53,16 @@ const NotFoundPage = () => {
             transition={{ delay: 0.7, duration: 0.6 }}
           >
             <Link to="/home" className="button button-primary">
-              🏠 На главную
+               На главную
             </Link>
             <button 
               onClick={() => window.history.back()} 
               className="button button-outline"
             >
-              ↩️ Назад
+               Назад
             </button>
           </motion.div>
 
-          {/* Дополнительные ссылки */}
           <motion.div
             className="not-found-links"
             initial={{ opacity: 0 }}
@@ -73,19 +71,14 @@ const NotFoundPage = () => {
           >
             <p>Попробуйте перейти на:</p>
             <div className="quick-links">
-              <Link to="/analyze">🔍 Поиск дел</Link>
-              <Link to="/login">🔐 Войти</Link>
-              <Link to="/register">📝 Регистрация</Link>
+              <Link to="/analyze"> Поиск дел</Link>
+              <Link to="/login"> Войти</Link>
+              <Link to="/register"> Регистрация</Link>
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Декоративные элементы */}
-        <div className="not-found-decoration">
-          <div className="decoration-1"></div>
-          <div className="decoration-2"></div>
-          <div className="decoration-3"></div>
-        </div>
+        
       </div>
     </div>
   );

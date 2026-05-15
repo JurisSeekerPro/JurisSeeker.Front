@@ -1,4 +1,3 @@
-// src/pages/auth/LoginPage.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -20,7 +19,6 @@ const LoginPage = () => {
       ...prev,
       [name]: value
     }));
-    // Очищаем ошибку при изменении поля
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -58,11 +56,9 @@ const LoginPage = () => {
 
     setIsLoading(true);
     
-    // Имитация запроса к API
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log("Вход выполнен:", formData);
-      // Здесь будет реальный API вызов
       navigate("/");
     } catch (error) {
       setErrors({ submit: "Ошибка при входе. Проверьте данные и попробуйте снова." });
@@ -88,7 +84,7 @@ const LoginPage = () => {
       >
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-icon">⚖️</span>
+            <span className="auth-logo-icon"></span>
             <span className="auth-logo-text">Juris Seeker</span>
           </div>
           <h1 className="auth-title">С возвращением!</h1>
@@ -100,7 +96,7 @@ const LoginPage = () => {
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email" className="form-label">
-              <span className="form-label-required">📧 Email</span>
+              <span className="form-label-required"> Email</span>
             </label>
             <input
               type="email"
@@ -114,14 +110,14 @@ const LoginPage = () => {
             />
             {errors.email && (
               <div className="form-error">
-                ⚠️ {errors.email}
+                 {errors.email}
               </div>
             )}
           </div>
 
           <div className="form-group">
             <label htmlFor="password" className="form-label">
-              <span className="form-label-required">🔒 Пароль</span>
+              <span className="form-label-required"> Пароль</span>
             </label>
             <div className="password-input-container">
               <input
@@ -140,12 +136,12 @@ const LoginPage = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
               >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
+                {showPassword ? "" : ""}
               </button>
             </div>
             {errors.password && (
               <div className="form-error">
-                ⚠️ {errors.password}
+                 {errors.password}
               </div>
             )}
           </div>
@@ -162,7 +158,7 @@ const LoginPage = () => {
 
           {errors.submit && (
             <div className="form-error">
-              ⚠️ {errors.submit}
+               {errors.submit}
             </div>
           )}
 
@@ -177,7 +173,7 @@ const LoginPage = () => {
                 Вход...
               </>
             ) : (
-              "🚀 Войти в систему"
+              " Войти в систему"
             )}
           </button>
         </form>
@@ -186,11 +182,11 @@ const LoginPage = () => {
 
         <div className="social-auth">
           <button className="social-button social-button-google" disabled={isLoading}>
-            <span>🔍</span>
+            <span></span>
             Google
           </button>
           <button className="social-button social-button-github" disabled={isLoading}>
-            <span>💻</span>
+            <span></span>
             GitHub
           </button>
         </div>
@@ -201,7 +197,7 @@ const LoginPage = () => {
           disabled={isLoading}
           style={{ width: '100%' }}
         >
-          🎮 Демо вход
+           Демо вход
         </button>
 
         <div className="auth-footer">

@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Данные регионов с группировкой по ФО
 const regionsData = {
   "Центральный ФО": [
     "Москва", "Московская область", "Белгородская область", "Брянская область",

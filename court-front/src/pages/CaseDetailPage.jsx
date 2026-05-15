@@ -1,4 +1,3 @@
-// src/pages/CaseDetailPage.jsx
 import React from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { gql } from "@apollo/client";
@@ -7,7 +6,6 @@ import { motion } from "framer-motion";
 import "./../styles/case-detail.css";
 import DecisionText from "../components/DecisionText";
 
-// GraphQL запрос
 const GET_COURT_CASE_BY_ID = gql`
   query GetCourtCaseById($id: ID!) {
     courtCaseById(id: $id) {
@@ -52,7 +50,6 @@ const GET_COURT_CASE_BY_ID = gql`
   }
 `;
 
-// Форматирование ID в GUID
 const formatToGuid = (id) => {
   if (!id) return id;
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -64,7 +61,6 @@ const formatToGuid = (id) => {
   return id;
 };
 
-// Форматирование даты
 const formatDate = (dateString) => {
   if (!dateString) return null;
   if (typeof dateString === 'string' && dateString.toLowerCase() === '-infinity') {

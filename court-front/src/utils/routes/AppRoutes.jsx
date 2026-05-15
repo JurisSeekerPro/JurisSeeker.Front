@@ -9,7 +9,6 @@ const LoginPage = lazy(() => import("../../pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("../../pages/auth/RegisterPage"));
 const NotFoundPage = lazy(() => import("../../pages/NotFoundPage"));
 
-// Компонент для загрузки
 const PageLoader = () => (
   <div className="page-loader">
     <div className="loader-spinner"></div>

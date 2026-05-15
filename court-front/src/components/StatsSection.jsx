@@ -1,4 +1,3 @@
-// src/components/StatsSection.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { Database, Clock, TrendingUp, Scale } from "lucide-react";

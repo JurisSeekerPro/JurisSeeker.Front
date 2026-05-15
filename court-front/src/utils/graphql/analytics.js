@@ -1,4 +1,3 @@
-// src/graphql/queries/analytics.js
 import { gql } from '@apollo/client';
 
 export const GET_TOTAL_CASES_STATS = gql`

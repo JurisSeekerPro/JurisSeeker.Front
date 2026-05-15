@@ -1,4 +1,3 @@
-// src/components/InfiniteScroll.jsx
 import React, { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
@@ -7,7 +6,7 @@ export default function InfiniteScroll({
   onLoadMore, 
   hasMore, 
   loading,
-  threshold = 200 // За сколько пикселей до конца начинать загрузку
+  threshold = 200 
 }) {
   const observer = useRef();
   const lastElementRef = useCallback(node => {
@@ -28,7 +27,6 @@ export default function InfiniteScroll({
     }
   }, [loading, hasMore, onLoadMore]);
 
-  // Альтернативный вариант с отслеживанием скролла
   const containerRef = useRef();
 
   const handleScroll = useCallback(() => {

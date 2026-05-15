@@ -1,7 +1,3 @@
-/* src/styles/components.css */
-/* Контейнеры */
-
-/* В components.css добавь в самое начало */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -19,13 +15,11 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Глобальные стили для предотвращения переполнения */
 img, video, iframe {
   max-width: 100%;
   height: auto;
 }
 
-/* Стиль для очень длинных строк */
 .prevent-overflow {
   max-width: 100%;
   overflow-wrap: break-word;
@@ -49,7 +43,6 @@ img, video, iframe {
   margin: 0 auto;
 }
 
-/* Карточки */
 .card {
   background: white;
   border: 1px solid #e1e5e9;
@@ -73,7 +66,6 @@ img, video, iframe {
   border-radius: 12px;
 }
 
-/* Бейджи и теги */
 .badge {
   display: inline-block;
   padding: 4px 8px;
@@ -102,7 +94,6 @@ img, video, iframe {
   color: #856404;
 }
 
-/* Кнопки */
 .button {
   background: #007bff;
   color: white;
@@ -156,7 +147,6 @@ img, video, iframe {
   text-decoration: underline;
 }
 
-/* Формы */
 .input {
   width: 100%;
   padding: 12px 16px;
@@ -179,7 +169,6 @@ img, video, iframe {
   color: #333;
 }
 
-/* Текст */
 .text-title {
   font-size: 28px;
   font-weight: 600;
@@ -215,7 +204,6 @@ img, video, iframe {
   color: #6c757d;
 }
 
-/* Сетки */
 .grid {
   display: grid;
   gap: 24px;
@@ -255,7 +243,6 @@ img, video, iframe {
 .gap-md { gap: 16px; }
 .gap-lg { gap: 24px; }
 
-/* Отступы */
 .mb-sm { margin-bottom: 8px; }
 .mb-md { margin-bottom: 16px; }
 .mb-lg { margin-bottom: 24px; }
@@ -269,7 +256,6 @@ img, video, iframe {
 .p-md { padding: 16px; }
 .p-lg { padding: 24px; }
 
-/* Утилиты */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -279,7 +265,6 @@ img, video, iframe {
 
 .cursor-pointer { cursor: pointer; }
 
-/* Анимации */
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -289,7 +274,6 @@ img, video, iframe {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Дополнительные утилиты в components.css */
 .bg-light {
   background-color: #f8f9fa;
 }
@@ -307,7 +291,6 @@ img, video, iframe {
   width: 100%;
 }
 
-/* В components.css добавь: */
 .border-top {
   border-top: 1px solid #e1e5e9;
 }
@@ -324,7 +307,6 @@ img, video, iframe {
   background-color: #f8f9fa;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .grid-2 {
     grid-template-columns: 1fr;
@@ -336,7 +318,6 @@ img, video, iframe {
 }
 
 
-/* Новые стили для главной страницы */
 .home-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -639,7 +620,6 @@ img, video, iframe {
   color: #3b82f6;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;
@@ -695,7 +675,6 @@ img, video, iframe {
 }
 
 
-/* Стили для расширенного поиска */
 .search-filters {
   background: white;
   border-radius: 20px;
@@ -725,7 +704,6 @@ img, video, iframe {
   font-size: 0.95rem;
 }
 
-/* Навигация по секциям */
 .section-navigation {
   display: flex;
   background: #f8fafc;
@@ -769,7 +747,6 @@ img, video, iframe {
   font-size: 16px;
 }
 
-/* Содержимое секций */
 .section-content {
   padding: 24px;
   min-height: 300px;
@@ -790,7 +767,6 @@ img, video, iframe {
   }
 }
 
-/* Формы */
 .form-group {
   margin-bottom: 24px;
 }
@@ -832,7 +808,6 @@ img, video, iframe {
   color: #9ca3af;
 }
 
-/* Чипсы */
 .chips-grid {
   display: flex;
   flex-wrap: wrap;
@@ -863,7 +838,6 @@ img, video, iframe {
   color: white;
 }
 
-/* Быстрые даты */
 .quick-dates {
   display: flex;
   gap: 8px;
@@ -898,7 +872,6 @@ img, video, iframe {
   font-weight: 500;
 }
 
-/* Радио кнопки */
 .radio-group {
   display: flex;
   gap: 20px;
@@ -943,7 +916,6 @@ img, video, iframe {
   transform: translate(-50%, -50%);
 }
 
-/* Кнопки действий */
 .filters-actions {
   display: flex;
   justify-content: space-between;
@@ -993,7 +965,6 @@ img, video, iframe {
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-/* Активные фильтры */
 .active-filters {
   padding: 20px 24px;
   border-top: 1px solid #f1f5f9;
@@ -1023,7 +994,6 @@ img, video, iframe {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .section-navigation {
     flex-direction: column;
@@ -1071,7 +1041,6 @@ img, video, iframe {
 }
 
 
-/* Стили для выбора регионов */
 .region-selector {
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -1347,7 +1316,6 @@ img, video, iframe {
   color: white;
 }
 
-/* Адаптивность для RegionSelector */
 @media (max-width: 768px) {
   .regions-grid {
     grid-template-columns: 1fr;
@@ -1372,7 +1340,6 @@ img, video, iframe {
   }
 }
 
-/* Скроллбар */
 .districts-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -1392,7 +1359,6 @@ img, video, iframe {
 }
 
 
-/* src/styles/components.css */
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -1426,7 +1392,6 @@ img, video, iframe {
   color: #dc3545;
 }
 
-/* Search Filters Styles */
 .search-filters {
   background: #f8f9fa;
   border-radius: 8px;
@@ -1623,14 +1588,12 @@ img, video, iframe {
   color: #495057;
 }
 
-/* Case List */
 .case-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .page-container {
     padding: 1rem;
@@ -1649,7 +1612,6 @@ img, video, iframe {
   }
 }
 
-/* src/styles/components.css */
 .decision-content {
   white-space: pre-wrap;
   line-height: 1.6;
@@ -1676,7 +1638,6 @@ img, video, iframe {
   gap: 12px;
 }
 
-/* Добавь в components.css */
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -1746,9 +1707,6 @@ img, video, iframe {
 
 
 
-
-
-/* Общие компоненты */
 .button {
   display: inline-flex;
   align-items: center;
@@ -1807,7 +1765,6 @@ img, video, iframe {
   text-decoration: underline;
 }
 
-/* Утилиты для текста */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -1834,7 +1791,6 @@ img, video, iframe {
 
 .w-full { width: 100%; }
 
-/* В ваш CSS файл */
 .checkbox-label {
   display: flex;
   align-items: center;

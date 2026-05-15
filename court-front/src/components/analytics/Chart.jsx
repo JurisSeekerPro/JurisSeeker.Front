@@ -2,7 +2,6 @@ import React from 'react';
 import '../../styles/Chart.css';
 
 const Chart = ({ data, type = 'bar', title }) => {
-  // Защита от null/undefined данных
   const safeData = data?.filter(item => item != null && item.value != null) || [];
   
   // Если нет данных, показываем заглушку

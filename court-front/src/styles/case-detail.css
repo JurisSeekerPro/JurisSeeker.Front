@@ -1,4 +1,3 @@
-/* Страница деталей дела */
 .case-detail-page {
   max-width: 1400px;
   margin: 0 auto;
@@ -7,7 +6,6 @@
   overflow-x: hidden;
 }
 
-/* ИСПРАВЛЕННАЯ ШАПКА */
 .case-header {
   margin-bottom: 32px;
   padding-bottom: 24px;
@@ -18,7 +16,6 @@
 
 }
 
-/* ИСПРАВЛЕННАЯ КНОПКА НАЗАД */
 .back-button {
   display: inline-flex;
   align-items: center;
@@ -58,19 +55,17 @@
   outline-offset: 2px;
 }
 
-/* Улучшенные стили для заголовка дела */
 .case-title {
   font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 24px; /* Увеличил с 20px до 24px */
+  margin-bottom: 24px; 
   line-height: 1.3;
   width: 100%;
   word-break: break-word;
   padding-right: 20px;
 }
 
-/* Улучшенные стили для бейджей */
 .case-meta {
   display: flex;
   flex-wrap: wrap;
@@ -85,10 +80,10 @@
 .case-badge {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px; /* Увеличил вертикальные padding */
+  padding: 8px 16px; 
   background: #f0f7ff;
   color: #0066cc;
-  border-radius: 8px; /* Увеличил радиус скругления */
+  border-radius: 8px; 
   font-size: 14px;
   font-weight: 500;
   border: 1px solid rgba(0, 102, 204, 0.2);
@@ -97,7 +92,7 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  height: 36px; /* Увеличил высоту */
+  height: 36px; 
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -114,7 +109,6 @@
   color: #495057;
 }
 
-/* Основной номер дела - делаем его немного заметнее */
 .case-badge:first-child {
   background: #e7f1ff;
   color: #0056b3;
@@ -136,7 +130,6 @@
   color: #495057;
 }
 
-/* Основной номер дела - делаем его немного заметнее */
 .case-badge:first-child {
   background: #e7f1ff;
   color: #0056b3;
@@ -153,10 +146,9 @@
   order: 3;
 }
 
-/* ОСНОВНОЙ КОНТЕНТ - ИЗМЕНЕНО */
 .case-content {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* Изменил: левая 2 части, правая 1 часть */
+  grid-template-columns: 2fr 1fr; 
   gap: 40px;
   width: 100%;
   box-sizing: border-box;
@@ -176,7 +168,6 @@
   }
 }
 
-/* Левая колонка теперь чуть уже */
 .case-left-column {
   display: flex;
   flex-direction: column;
@@ -184,7 +175,6 @@
   width: 100%;
 }
 
-/* Правая колонка чуть шире */
 .case-right-column {
   display: flex;
   flex-direction: column;
@@ -192,14 +182,12 @@
   width: 100%;
 }
 
-/* Увеличиваем отступы для лучшего разделения */
 @media (max-width: 1024px) {
   .case-right-column {
     max-width: 100%;
   }
 }
 
-/* Секции - слегка увеличенные отступы */
 .case-section {
   background: white;
   border: 1px solid #e1e5e9;
@@ -229,7 +217,6 @@
   width: 100%;
 }
 
-/* Детали дела в правой колонке */
 .details-grid {
   display: flex;
   flex-direction: column;
@@ -251,7 +238,7 @@
 .detail-label {
   font-weight: 500;
   color: #495057;
-  min-width: 150px; /* Немного увеличил */
+  min-width: 150px; 
   font-size: 14px;
 }
 
@@ -278,10 +265,9 @@
   color: #6c757d;
 }
 
-/* Стороны процесса в левой колонке */
 .names-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Чуть уменьшил минимальную ширину */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
   gap: 20px;
 }
 
@@ -359,7 +345,6 @@
   color: #1a1a1a;
 }
 
-/* Стили для отображения имен с новой строки */
 .name-content.text-multiline {
   display: flex;
   flex-direction: column;
@@ -385,7 +370,6 @@
   word-break: break-word;
 }
 
-/* Текст решения */
 .decision-content-wrapper {
   background: #f8f9fa;
   border-radius: 8px;
@@ -407,7 +391,6 @@
   max-width: 100%;
 }
 
-/* Хронология */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -474,7 +457,6 @@
   line-height: 1.5;
 }
 
-/* Компактная версия сторон в правой колонке */
 .compact-parties {
   display: flex;
   flex-direction: column;
@@ -508,7 +490,6 @@
   color: #dc3545;
 }
 
-/* Для компактной версии с разделенными именами */
 .compact-party-content {
   display: flex;
   flex-direction: column;
@@ -525,7 +506,6 @@
   overflow: visible;
 }
 
-/* Статьи в правой колонке - теперь больше места */
 .articles-list {
   display: flex;
   flex-direction: column;
@@ -536,7 +516,7 @@
   background: #f8f9fa;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
-  padding: 18px; /* Немного увеличил padding */
+  padding: 18px; 
   transition: all 0.2s ease;
 }
 
@@ -549,18 +529,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px; /* Увеличил отступ */
+  margin-bottom: 10px; 
 }
 
 .article-number {
-  font-size: 16px; /* Немного увеличил */
+  font-size: 16px; 
   font-weight: 600;
   color: #1a1a1a;
 }
 
 .article-outcome {
   font-size: 12px;
-  padding: 4px 10px; /* Немного увеличил padding */
+  padding: 4px 10px;
   border-radius: 4px;
   font-weight: 500;
 }
@@ -583,7 +563,7 @@
 .article-desc {
   font-size: 14px;
   color: #6c757d;
-  margin-bottom: 6px; /* Увеличил отступ */
+  margin-bottom: 6px; 
   line-height: 1.5;
 }
 
@@ -592,7 +572,6 @@
   color: #adb5bd;
 }
 
-/* Ссылки */
 .links-grid {
   display: flex;
   flex-direction: column;
@@ -641,7 +620,6 @@
   color: #0066cc;
 }
 
-/* Утилиты */
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -656,19 +634,17 @@
   line-height: 1.6;
 }
 
-/* На больших экранах */
 @media (min-width: 1400px) {
   .case-detail-page {
     max-width: 1500px;
   }
   
   .case-content {
-    grid-template-columns: 2fr 1fr; /* Сохраняем пропорции */
+    grid-template-columns: 2fr 1fr; 
     gap: 48px;
   }
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .case-detail-page {
     padding: 16px;
@@ -678,7 +654,6 @@
     font-size: 24px;
   }
   
-  /* ИСПРАВЛЕНА КНОПКА НА МОБИЛЬНЫХ */
   .back-button {
     padding: 12px 16px;
     margin-bottom: 20px;
@@ -743,7 +718,6 @@
   }
 }
 
-/* Улучшенная адаптивность для бейджей */
 @media (max-width: 768px) {
   .case-title {
     font-size: 24px;
@@ -795,7 +769,6 @@
   }
 }
 
-/* Состояния загрузки и ошибок */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -868,7 +841,6 @@
   }
 }
 
-/* Общие исправления для предотвращения переполнения */
 * {
   box-sizing: border-box;
 }
@@ -879,7 +851,6 @@ html, body {
   max-width: 100%;
 }
 
-/* Для очень длинного текста в левой колонке */
 .case-left-column .text-multiline,
 .case-left-column .name-content,
 .case-left-column .party-content {
@@ -888,7 +859,6 @@ html, body {
   overflow-wrap: break-word;
 }
 
-/* Для деталей в правой колонке */
 .details-grid {
   display: flex;
   flex-direction: column;
@@ -927,7 +897,6 @@ html, body {
   max-width: 100%;
 }
 
-/* Адаптивность для деталей */
 @media (max-width: 768px) {
   .detail-row {
     flex-direction: column;
@@ -946,9 +915,7 @@ html, body {
   }
 }
 
-/* Добавить в конец src/styles/case-detail.css */
 
-/* Стили для секции с решением */
 .decision-type-badge {
   background: #4a6fa5;
   color: white;
@@ -961,13 +928,11 @@ html, body {
   display: inline-block;
 }
 
-/* Контейнер для ссылки на решение */
 .decision-link-container {
   width: 100%;
   margin-top: 8px;
 }
 
-/* Ссылка на внешнее решение - СДЕРЖАННЫЕ СТИЛИ */
 .decision-external-link {
   display: block;
   padding: 16px 20px;
@@ -987,14 +952,12 @@ html, body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-/* Содержимое ссылки */
 .decision-link-content {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* Иконка */
 .decision-link-icon {
   font-size: 22px;
   flex-shrink: 0;
@@ -1013,14 +976,13 @@ html, body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* Текст ссылки */
 .decision-link-text {
   flex: 1;
   min-width: 0;
 }
 
 .decision-link-title {
-  font-weight: 500; /* Полужирный, но не жирный */
+  font-weight: 500; 
   font-size: 15px;
   color: #2d3748;
   margin-bottom: 2px;
@@ -1031,7 +993,6 @@ html, body {
   color: #1a202c;
 }
 
-/* Стрелка */
 .decision-link-arrow {
   font-size: 18px;
   color: #4a6fa5;
@@ -1045,7 +1006,6 @@ html, body {
   transform: translateX(2px);
 }
 
-/* Сообщение о недоступности текста */
 .no-decision-text {
   display: flex;
   flex-direction: column;
@@ -1067,7 +1027,6 @@ html, body {
   font-style: italic;
 }
 
-/* Адаптивность для секции решения */
 @media (max-width: 768px) {
   .decision-link-content {
     gap: 12px;
@@ -1121,7 +1080,6 @@ html, body {
 }
 
 
-/* Стили для grid с 4 элементами */
 .names-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1132,7 +1090,6 @@ html, body {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .names-grid {
     grid-template-columns: 1fr;

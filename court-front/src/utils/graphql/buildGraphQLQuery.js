@@ -1,14 +1,10 @@
-// src/utils/graphql/buildGraphQLQuery.js
-
 /**
- * Формирует GraphQL-запрос для поиска судебных дел по фильтрам
  * @param {Object} filters - объект фильтров
  * @returns {{ query: string, variables: Object }}
  */
 export const buildGraphQLSearchQuery = (filters) => {
   const variables = {};
 
-  // Строим input для GraphQL
   const inputFields = [];
 
   if (filters.searchText) {
@@ -76,7 +72,6 @@ export const buildGraphQLSearchQuery = (filters) => {
     inputFields.push('legalNorms: $legalNorms');
   }
 
-  // Формируем сам GraphQL-запрос
   const query = `
     query SearchCourtDecisions(${Object.keys(variables).map(k => `$${k}: ${getGraphQLType(filters[k])}`).join(', ')}) {
       searchCourtDecisions(input: { ${inputFields.join(', ')} }) {
@@ -97,7 +92,6 @@ export const buildGraphQLSearchQuery = (filters) => {
 };
 
 /**
- * Определяет GraphQL тип переменной на основе значения
  * @param {any} value 
  * @returns {string} GraphQL тип
  */

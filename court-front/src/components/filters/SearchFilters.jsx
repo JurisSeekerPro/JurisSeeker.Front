@@ -1,4 +1,3 @@
-// src/components/filters/SearchFilters.jsx
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RegionSelector from "./RegionSelector";
@@ -28,7 +27,6 @@ const SearchFilters = ({
     { label: "Произвольный период", value: "custom" }
   ];
 
-  // Опции для исхода дела по умолчанию
   const defaultOutcomeOptions = outcomeOptions.length > 0 ? outcomeOptions : [
     { value: null, label: "Любой исход" },
     { value: 0, label: "Неизвестно" },
@@ -119,7 +117,6 @@ const SearchFilters = ({
         </div>
       )}
 
-      {/* Навигация по секциям */}
       <div className="section-navigation">
         {Object.entries(sections).map(([key, sec]) => (
           <button
@@ -133,7 +130,6 @@ const SearchFilters = ({
         ))}
       </div>
 
-      {/* Секции */}
       <div className="section-content">
         <AnimatePresence mode="wait">
           <motion.div
@@ -165,7 +161,6 @@ const SearchFilters = ({
                   onKeyDown={handleKeyDown}
                 />
 
-                {/* Судья */}
                 <label className="form-label mt-md">Судья</label>
                 <input
                   type="text"
@@ -176,7 +171,6 @@ const SearchFilters = ({
                   onKeyDown={handleKeyDown}
                 />
 
-                {/* Истец */}
                 <label className="form-label mt-md">Истец</label>
                 <input
                   type="text"
@@ -187,7 +181,6 @@ const SearchFilters = ({
                   onKeyDown={handleKeyDown}
                 />
 
-                {/* Ответчик */}
                 <label className="form-label mt-md">Ответчик</label>
                 <input
                   type="text"
@@ -198,7 +191,6 @@ const SearchFilters = ({
                   onKeyDown={handleKeyDown}
                 />
 
-                {/* Исход дела - НОВОЕ ПОЛЕ */}
                 <label className="form-label mt-md">Исход дела</label>
                 <select
                   className="form-input"
@@ -215,7 +207,6 @@ const SearchFilters = ({
                   ))}
                 </select>
 
-                {/* Чекбокс наличия решения */}
                 <div className="mt-md">
                   <label className="checkbox-label">
                     <input
@@ -247,7 +238,6 @@ const SearchFilters = ({
                   ))}
                 </div>
 
-                {/* Произвольные даты */}
                 {safeArray(filters.dateRanges).includes("custom") && (
                   <div className="custom-dates mt-md">
                     <div className="date-range-group">
@@ -288,7 +278,6 @@ const SearchFilters = ({
         </AnimatePresence>
       </div>
 
-      {/* Кнопки действий */}
       <div className="filters-actions">
         <button 
           type="button"
@@ -306,7 +295,6 @@ const SearchFilters = ({
         </button>
       </div>
 
-      {/* Активные фильтры */}
       {hasActiveFilters && (
         <div className="active-filters">
           {filters.searchText && (

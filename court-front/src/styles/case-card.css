@@ -1,6 +1,3 @@
-/* src/styles/case-card.css */
-
-/* Основной контейнер карточки дела */
 .case-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -29,7 +26,6 @@
   transform: translateY(0);
 }
 
-/* Шапка карточки */
 .case-header {
   display: flex;
   justify-content: space-between;
@@ -49,7 +45,6 @@
   margin-right: 16px;
 }
 
-/* Контейнер для номера дела справа */
 .case-number-container {
   text-align: right;
   display: flex;
@@ -77,7 +72,6 @@
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
 }
 
-/* Детали дела */
 .case-details {
   margin-bottom: 20px;
 }
@@ -107,7 +101,6 @@
   flex: 1;
 }
 
-/* Футер карточки */
 .case-footer {
   display: flex;
   justify-content: space-between;
@@ -166,7 +159,6 @@
   transform: translateY(0);
 }
 
-/* Адаптивность */
 @media (max-width: 640px) {
   .case-card {
     padding: 16px;
@@ -214,7 +206,6 @@
   }
 }
 
-/* Легкий акцент при наведении на детали */
 .detail-value {
   transition: color 0.2s ease;
 }

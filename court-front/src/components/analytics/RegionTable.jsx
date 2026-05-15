@@ -2,7 +2,6 @@ import React from 'react';
 import '../../styles/RegionTable.css';
 
 const RegionTable = ({ data, columns }) => {
-  // Защита от null данных
   const safeData = data?.filter(row => row != null) || [];
   
   return (

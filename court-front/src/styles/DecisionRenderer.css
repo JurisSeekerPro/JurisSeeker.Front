@@ -1,4 +1,3 @@
-/* src/components/DecisionRenderer.css */
 .decision-renderer {
   font-family: 'Georgia', 'Times New Roman', serif;
   line-height: 1.6;
@@ -25,7 +24,6 @@
   max-height: none !important;
 }
 
-/* Заголовки */
 .decision-title {
   text-align: center;
   font-size: 24px;
@@ -47,7 +45,6 @@
   border-left: 3px solid #7986cb;
 }
 
-/* Абзацы */
 .decision-paragraph {
   margin: 16px 0;
   text-indent: 1.5em;
@@ -56,14 +53,12 @@
   word-wrap: break-word;
 }
 
-/* Убираем отступ для первого абзаца после заголовка */
 .decision-title + .decision-paragraph,
 .decision-subtitle + .decision-paragraph {
   text-indent: 0;
   margin-top: 8px;
 }
 
-/* Списки */
 .decision-list {
   margin: 16px 0;
   padding-left: 32px;
@@ -74,7 +69,6 @@
   line-height: 1.5;
 }
 
-/* Защищенные данные */
 .decision-paragraph strong {
   font-weight: 600;
 }
@@ -83,7 +77,6 @@
   font-style: italic;
 }
 
-/* Особые стили для защищенных данных */
 .decision-paragraph [data-protected] {
   background: #f5f5f5;
   padding: 2px 4px;
@@ -93,7 +86,6 @@
   color: #d32f2f;
 }
 
-/* Кнопка развернуть */
 .expand-button {
   display: block;
   width: 100%;
@@ -114,7 +106,6 @@
   border-color: #1976d2;
 }
 
-/* Затемнение для длинного текста */
 .decision-content:not(.expanded)::after {
   content: '';
   position: absolute;
@@ -126,7 +117,6 @@
   pointer-events: none;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .decision-title {
     font-size: 20px;

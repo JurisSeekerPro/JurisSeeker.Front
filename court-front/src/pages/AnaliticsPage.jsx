@@ -1,4 +1,3 @@
-// src/pages/analytics/AnalyticsPage.jsx
 import React, { useState } from 'react';
 import { useQuery } from "@apollo/client/react";
 import { useNavigate } from 'react-router-dom'; 
@@ -57,7 +56,6 @@ const AnalyticsPage = () => {
     fetchPolicy: 'cache-and-network'
   });
 
-  // Хелперы для безопасной обработки данных
   const safeNumber = (value) => {
     if (value === null || value === undefined) return 0;
     if (typeof value === 'string') {
@@ -93,12 +91,10 @@ const AnalyticsPage = () => {
   const dashboard = data?.analyticsDashboard || {};
   const totalStats = dashboard.totalStats || {};
   
-  // Безопасные массивы данных с фильтрацией null
   const regionStats = (dashboard.regionStats || []).filter(r => r != null);
   const decisionStats = (dashboard.decisionStats || []).filter(d => d != null);
   const outcomeStats = (dashboard.outcomeStats || []).filter(o => o != null);
 
-  // Данные для графиков с защитой от null
   const regionCasesChart = regionStats
     .filter(r => r.region)
     .map(r => ({
@@ -116,7 +112,6 @@ const AnalyticsPage = () => {
     }))
     .sort((a, b) => b.value - a.value);
 
-  // Средний процент решений
   const avgDecisionRate = decisionStats.length > 0
     ? Math.round(
         decisionStats.reduce((acc, d) => acc + safeNumber(d.decisionRate), 0) / decisionStats.length
@@ -125,14 +120,8 @@ const AnalyticsPage = () => {
 
   return (
     <div className="analytics-page">
-      {/* Шапка */}
       <div className="analytics-header-actions">
-        <button 
-          onClick={() => navigate('/home')} 
-          className="back-button"
-        >
-          ← На главную
-        </button>
+      
         <div className="analytics-header">
           <h1>Аналитика судебных дел</h1>
           <div className="analytics-date">
@@ -143,7 +132,6 @@ const AnalyticsPage = () => {
         </div>
       </div>
 
-      {/* Карточки с основными показателями */}
       <div className="analytics-cards">
         <StatsCard
           title="Всего дел"
@@ -175,7 +163,6 @@ const AnalyticsPage = () => {
         />
       </div>
 
-      {/* Графики */}
       <div className="analytics-charts">
         <div className="chart-wrapper">
           <Chart 
@@ -191,7 +178,6 @@ const AnalyticsPage = () => {
         </div>
       </div>
 
-      {/* Таблица регионов */}
       <div className="analytics-section">
         <div className="section-header">
           <h2>Статистика по регионам</h2>
@@ -247,8 +233,7 @@ const AnalyticsPage = () => {
         />
       </div>
 
-      {/* Таблица исходов */}
-      <div className="analytics-section">
+       <div className="analytics-section">
         <h2>Исходы дел по регионам</h2>
         <RegionTable 
           data={outcomeStats.slice(0, limit)}
@@ -280,10 +265,9 @@ const AnalyticsPage = () => {
             }
           ]}
         />
-      </div>
+      </div> 
 
-      {/* Детальная статистика исходов */}
-      <div className="analytics-section">
+       <div className="analytics-section">
         <h2>Детальная статистика исходов</h2>
         <RegionTable 
           data={outcomeStats.slice(0, limit)}

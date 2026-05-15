@@ -63,7 +63,6 @@ body {
 }
 
 
-/* src/index.css */
 .case-card {
   transition: all 0.2s ease;
 }
@@ -72,7 +71,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Стили для статусов исхода дела */
 .outcome-plaintiff {
   color: #28a745;
 }
