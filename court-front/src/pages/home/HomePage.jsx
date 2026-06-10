@@ -20,10 +20,7 @@ import "../../styles/components.css";
 const CASE_OUTCOME_VALUES = {
   UNKNOWN: 0,
   PLAINTIFF_WON: 1,
-  DEFENDANT_WON: 2,
-  SETTLEMENT: 3,
-  CASE_DISMISSED: 4,
-  PARTIALLY_GRANTED: 5
+  DEFENDANT_WON: 2
 };
 
 const OUTCOME_OPTIONS = [
@@ -40,22 +37,7 @@ const OUTCOME_OPTIONS = [
     value:
       CASE_OUTCOME_VALUES.DEFENDANT_WON,
     label: "Ответчик выиграл"
-  },
-  {
-    value:
-      CASE_OUTCOME_VALUES.SETTLEMENT,
-    label: "Мировое соглашение"
-  },
-  {
-    value:
-      CASE_OUTCOME_VALUES.CASE_DISMISSED,
-    label: "Дело прекращено"
-  },
-  {
-    value:
-      CASE_OUTCOME_VALUES.PARTIALLY_GRANTED,
-    label: "Частично удовлетворено"
-  },
+  },  
   {
     value:
       CASE_OUTCOME_VALUES.UNKNOWN,
@@ -168,15 +150,6 @@ const getOutcomeGraphQLValue = (
 
     case 2:
       return "DEFENDANT_WON";
-
-    case 3:
-      return "SETTLEMENT";
-
-    case 4:
-      return "CASE_DISMISSED";
-
-    case 5:
-      return "PARTIALLY_GRANTED";
 
     default:
       return null;

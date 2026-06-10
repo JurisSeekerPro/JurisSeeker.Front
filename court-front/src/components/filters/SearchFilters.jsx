@@ -31,10 +31,7 @@ const SearchFilters = ({
     { value: null, label: "Любой исход" },
     { value: 0, label: "Неизвестно" },
     { value: 1, label: "Истец выиграл" },
-    { value: 2, label: "Ответчик выиграл" },
-    { value: 3, label: "Мировое соглашение" },
-    { value: 4, label: "Дело прекращено" },
-    { value: 5, label: "Частично удовлетворено" }
+    { value: 2, label: "Ответчик выиграл" }
   ];
 
   const safeArray = (arr) => Array.isArray(arr) ? arr : [];

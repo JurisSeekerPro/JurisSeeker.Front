@@ -32,13 +32,6 @@ const GET_COURT_CASE_BY_ID = gql`
       caseSubcategory
       outcome
       caseResult
-      articles {
-        articleNumber
-        description
-        outcome
-        part
-        point
-      }
       movements {
         eventName
         eventResult
@@ -129,22 +122,6 @@ export default function CaseDetailPage() {
 
   const outcomeInfo = courtCase ? parseOutcomeValue(courtCase.outcome) : { text: "Неизвестно" };
 
-  const getArticleOutcomeText = (outcome) => {
-    const outcomes = {
-      Unknown: "",
-      Applied: "Применена",
-      NotApplied: "Не применена",
-      PartiallyApplied: "Частично применена",
-    };
-    return outcomes[outcome] || "";
-  };
-
-  const getArticleOutcomeClass = (outcome) => {
-    if (outcome === "Applied") return "applied";
-    if (outcome === "NotApplied") return "not-applied";
-    if (outcome === "PartiallyApplied") return "partial";
-    return "";
-  };
 
   const getDecisionIcon = (decisionType) => {
     switch (decisionType) {
@@ -492,37 +469,7 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {courtCase.articles && courtCase.articles.length > 0 && (
-              <div className="case-section">
-                <div className="section-header">
-                  <h2 className="section-title">
-                    {courtCase.hasDecision ? "Примененные статьи" : "Упомянутые статьи"}
-                  </h2>
-                </div>
-                <div className="section-body">
-                  <div className="articles-list">
-                    {courtCase.articles.map((article, index) => (
-                      <div key={index} className="article-item">
-                        <div className="article-header">
-                          <div className="article-number">Статья {article.articleNumber}</div>
-                          {courtCase.hasDecision && article.outcome && article.outcome !== "Unknown" && (
-                            <span className={`article-outcome ${getArticleOutcomeClass(article.outcome)}`}>
-                              {getArticleOutcomeText(article.outcome)}
-                            </span>
-                          )}
-                        </div>
-                        {article.description && <div className="article-desc">{article.description}</div>}
-                        {(article.part || article.point) && (
-                          <div className="article-meta">
-                            {[article.part, article.point].filter(Boolean).join(", ")}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+          
 
             {(courtCase.link || courtCase.originalCaseLink) && (
               <div className="case-section">

@@ -39,8 +39,6 @@ const GET_ANALYTICS_DASHBOARD = gql`
         plaintiffWinPercentage
         defendantWins
         defendantWinPercentage
-        settlementPercentage
-        dismissedPercentage
       }
       calculatedAt
     }
@@ -251,16 +249,6 @@ const AnalyticsPage = () => {
             { 
               key: 'defendantWinPercentage', 
               label: 'Победы ответчиков',
-              render: (value) => safePercent(value)
-            },
-            { 
-              key: 'settlementPercentage', 
-              label: 'Мировые',
-              render: (value) => safePercent(value)
-            },
-            { 
-              key: 'dismissedPercentage', 
-              label: 'Прекращены',
               render: (value) => safePercent(value)
             }
           ]}
