@@ -8,9 +8,7 @@ const Navigation = () => {
 
   const navItems = [
     { path: '/home', label: 'Главная', icon: HomeIcon  },
-    { path: '/analitics', label: 'Аналитика', icon: AnalyticsIcon  },
-   // { path: '/login', label: 'Вход', icon: LoginIcon  },
-   // { path: '/register', label: 'Регистрация', icon: RegisterIcon },
+    { path: '/analitics', label: 'Аналитика', icon: AnalyticsIcon  }
   ];
 
   const isActive = (path) => location.pathname === path;
