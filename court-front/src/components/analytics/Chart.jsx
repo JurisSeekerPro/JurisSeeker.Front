@@ -4,7 +4,6 @@ import '../../styles/Chart.css';
 const Chart = ({ data, type = 'bar', title }) => {
   const safeData = data?.filter(item => item != null && item.value != null) || [];
   
-  // Если нет данных, показываем заглушку
   if (safeData.length === 0) {
     return (
       <div className="chart-container">

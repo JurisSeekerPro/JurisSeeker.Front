@@ -8,7 +8,6 @@ import RegionTable from '../components/analytics/RegionTable';
 import Chart from '../components/analytics/Chart';
 import '../styles/AnalyticsPage.css';
 
-// GraphQL запросы
 const GET_ANALYTICS_DASHBOARD = gql`
   query GetAnalyticsDashboard {
     analyticsDashboard {

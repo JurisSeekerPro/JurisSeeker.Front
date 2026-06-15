@@ -102,20 +102,11 @@ export default function CaseDetailPage() {
       'UNKNOWN': 'Неизвестно',
       'PLAINTIFF_WON': 'Истец выиграл',
       'DEFENDANT_WON': 'Ответчик выиграл',
-      'SETTLEMENT': 'Мировое соглашение',
-      'CASE_DISMISSED': 'Дело прекращено',
-      'PARTIALLY_GRANTED': 'Частично удовлетворено',
       '0': 'Неизвестно',
       '1': 'Истец выиграл',
       '2': 'Ответчик выиграл',
-      '3': 'Мировое соглашение',
-      '4': 'Дело прекращено',
-      '5': 'Частично удовлетворено',
       'PLAINTIFFWIN': 'Истец выиграл',
-      'DEFENDANTWIN': 'Ответчик выиграл',
-      'PARTIALLYGRANTED': 'Частично удовлетворено',
-      'DISMISSED': 'Дело прекращено',
-      'RETURNED': 'Возвращено',
+      'DEFENDANTWIN': 'Ответчик выиграл'
     };
     return { text: outcomeMap[outcomeStr] || `Неизвестный исход (${outcome})` };
   };

@@ -59,7 +59,6 @@ export default function InfiniteScroll({
     >
       {children}
       
-      {/* Элемент для отслеживания */}
       {hasMore && (
         <div 
           ref={lastElementRef}
@@ -70,7 +69,6 @@ export default function InfiniteScroll({
         />
       )}
       
-      {/* Индикатор загрузки */}
       {loading && hasMore && (
         <motion.div
           initial={{ opacity: 0 }}

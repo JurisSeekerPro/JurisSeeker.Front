@@ -4,7 +4,6 @@ import './DecisionRenderer.css';
 const DecisionRenderer = ({ content, showLineNumbers = false, maxHeight = null }) => {
   const [expanded, setExpanded] = useState(false);
 
-  // Разбираем контент на абзацы и форматируем
   const formattedContent = useMemo(() => {
     if (!content) return [];
     

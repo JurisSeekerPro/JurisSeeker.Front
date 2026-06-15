@@ -220,7 +220,6 @@ const SearchFilters = ({
 
             {activeSection === "dates" && (
               <div className="section-panel">
-                {/* Даты */}
                 <label className="form-label">Период поступления дела</label>
                 <div className="chips-grid">
                   {dateRanges.map(range => (

@@ -29,7 +29,6 @@ export default function Pagination({
       marginTop: '32px',
       flexWrap: 'wrap'
     }}>
-      {/* Кнопка "Назад" */}
       <motion.button
         onClick={handlePrevious}
         disabled={!hasPreviousPage}
@@ -51,7 +50,6 @@ export default function Pagination({
         ← Предыдущая
       </motion.button>
 
-      {/* Номер текущей страницы */}
       <div style={{
         padding: '8px 16px',
         backgroundColor: '#007bff',
@@ -63,7 +61,6 @@ export default function Pagination({
         Страница {currentPage}
       </div>
 
-      {/* Кнопка "Вперед" */}
       <motion.button
         onClick={handleNext}
         disabled={!hasNextPage}

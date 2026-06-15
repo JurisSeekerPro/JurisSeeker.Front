@@ -58,7 +58,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedDistricts, setExpandedDistricts] = useState(new Set(["Центральный ФО", "Северо-Западный ФО"]));
 
-  // Фильтрация регионов по поиску
   const filteredRegions = useMemo(() => {
     if (!searchTerm) return regionsData;
 
@@ -98,11 +97,9 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
     const allSelected = districtRegions.every(region => selectedRegions.includes(region));
     
     if (allSelected) {
-      // Убрать все регионы округа
       const newRegions = selectedRegions.filter(region => !districtRegions.includes(region));
       onRegionsChange(newRegions);
     } else {
-      // Добавить все регионы округа
       const newRegions = [...new Set([...selectedRegions, ...districtRegions])];
       onRegionsChange(newRegions);
     }
@@ -153,7 +150,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
         </div>
       </div>
 
-      {/* Поиск */}
       <div className="region-search">
         <input
           type="text"
@@ -172,7 +168,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
         )}
       </div>
 
-      {/* Список федеральных округов */}
       <div className="districts-list">
         {Object.entries(filteredRegions).map(([district, regions]) => {
           const districtSelectedCount = regions.filter(region => 
@@ -183,7 +178,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
 
           return (
             <div key={district} className="district-item">
-              {/* Заголовок округа */}
               <div 
                 className="district-header"
                 onClick={() => toggleDistrict(district)}
@@ -208,7 +202,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
                 </button>
               </div>
 
-              {/* Список регионов */}
               <AnimatePresence>
                 {isExpanded && (
                   <motion.div
@@ -237,7 +230,6 @@ const RegionSelector = ({ selectedRegions, onRegionsChange, className = "" }) =>
         })}
       </div>
 
-      {/* Быстрый выбор популярных регионов */}
       <div className="popular-regions">
         <div className="popular-title">Популярные регионы:</div>
         <div className="popular-chips">

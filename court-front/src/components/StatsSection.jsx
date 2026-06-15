@@ -4,7 +4,7 @@ import { Database, Clock, TrendingUp, Scale } from "lucide-react";
 
 const stats = [
   { value: "10,000+", label: "Судебных дел", icon: <Database size={20} /> },
-  { value: "2020-2024", label: "Период охвата", icon: <Clock size={20} /> },
+  { value: "2018-2026", label: "Период охвата", icon: <Clock size={20} /> },
   { value: "Ежедневно", label: "Обновление базы", icon: <TrendingUp size={20} /> },
   { value: "50+", label: "Судов", icon: <Scale size={20} /> }
 ];

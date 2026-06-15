@@ -5,7 +5,6 @@ import '../styles/case-card.css';
 export default function CaseCard({ courtCase }) {
   const navigate = useNavigate();
 
-  // Простой заголовок: Тип суда
   const getCaseTitle = () => {
     return courtCase.courtType || 'Судебное дело';
   };
@@ -71,7 +70,6 @@ export default function CaseCard({ courtCase }) {
       </div>
       
       <div className="case-details">
-        {/* Истец */}
         {courtCase.plaintiff && (
           <div className="detail-row">
             <span className="detail-label">Истец:</span>
@@ -79,7 +77,6 @@ export default function CaseCard({ courtCase }) {
           </div>
         )}
         
-        {/* Ответчик */}
         {courtCase.defendant && (
           <div className="detail-row">
             <span className="detail-label">Ответчик:</span>
@@ -87,7 +84,6 @@ export default function CaseCard({ courtCase }) {
           </div>
         )}
         
-        {/* Регион */}
         {courtCase.region && (
           <div className="detail-row">
             <span className="detail-label">Регион:</span>
@@ -95,7 +91,6 @@ export default function CaseCard({ courtCase }) {
           </div>
         )}
         
-        {/* Судья */}
         {courtCase.judgeName && courtCase.judgeName.trim() !== "" && (
           <div className="detail-row">
             <span className="detail-label">Судья:</span>
@@ -103,7 +98,6 @@ export default function CaseCard({ courtCase }) {
           </div>
         )}
         
-        {/* Дата поступления */}
         {courtCase.receivedDate && (
           <div className="detail-row">
             <span className="detail-label">Дата поступления:</span>
